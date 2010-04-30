@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import os, sys
 
 from termcolor import colored
@@ -33,7 +35,8 @@ configuration = {
     'default_fetch_tags' : False,
     'default_pull' : False,
     'default_pull_ff_only' : True,
-    # TODO: 'default_force_gc' : False,
+    'default_force_gc' : False,
+    'default_force_gc_agressive' : False,
     # TODO: 'default_gc_interval' : 5,
     # TODO: 'default_aggressive_gc_interval' : 0
 }
@@ -67,7 +70,7 @@ def getDefaultProjectConf():
     retVal = {}
     
     # All keys beginning by "default_" are default project configuration
-    for key, value in configuration.items():
+    for key, value in list(configuration.items()):
         if(key.startswith('default_')):
             # Removing the beginning of the key, it's now a valid project conf
             retVal[key.replace('default_', '')] = value
@@ -88,7 +91,7 @@ def readProjects():
     return retVal
 
 def handleAllProjects(projects, globalOptions):
-    for project, config in projects.items():
+    for project, config in list(projects.items()):
         handleProject(project, config, globalOptions)
 
 def handleProject(project, config, globalOptions):
@@ -212,16 +215,16 @@ def printOK(message, prefix=''):
 def printOut(out):
     if(getBool(configuration['print_git_out'])):
         if(len(out) == 2):
-            if out[0] != '': print out[0].strip()
-            if out[1] != '': print out[1].strip()
+            if out[0] != '': print(out[0].strip())
+            if out[1] != '': print(out[1].strip())
         
         else:
-            print out.strip()
+            print(out.strip())
 
 def printColor(message, type, color, prefix='', out=sys.stdout):
     type = colored(type, color, attrs=("bold",)) if canUseColors() else type
     
-    print >> out, "%s[ %s ] %s" % (prefix, type, message) 
+    print("%s[ %s ] %s" % (prefix, type, message), file=out) 
 
 def canUseColors():    
     if hasattr(sys.stderr, "fileno"): # Thanks to René 'Necoro' Neumann
