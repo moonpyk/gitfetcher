@@ -17,7 +17,7 @@ CONFIGURATION_PLACES = (
 )
 
 configParser = ConfigParser()
-optionsParser = OptionParser(version='%prog 0.1', usage='%prog [options] [project...]')
+optionsParser = OptionParser(version='%prog 0.2', usage='%prog [options] [project...]')
 
 optionsParser.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
 optionsParser.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
@@ -32,6 +32,7 @@ configuration = {
     'default_fetch_all' : False,
     'default_fetch_tags' : False,
     'default_pull' : False,
+    'default_pull_ff_only' : True,
     # TODO: 'default_force_gc' : False,
     # TODO: 'default_gc_interval' : 5,
     # TODO: 'default_aggressive_gc_interval' : 0
@@ -56,15 +57,19 @@ def openConfiguration(specificFile=None):
         
 def readConfiguration():
     if OPTION_SECTION_NAME in configParser.sections():
+        # Merging default configuration with user's one, user's takes precedence
         configuration.update(configParser.items(OPTION_SECTION_NAME))
+        
     else:
         printWarning("No gitfetcher configuration section found. Using default one")
         
 def getDefaultProjectConf():
     retVal = {}
     
+    # All keys beginning by "default_" are default project configuration
     for key, value in configuration.items():
         if(key.startswith('default_')):
+            # Removing the beginning of the key, it's now a valid project conf
             retVal[key.replace('default_', '')] = value
     
     return retVal
@@ -74,9 +79,10 @@ def readProjects():
     
     for project in configParser.sections():
         if project != OPTION_SECTION_NAME:     
-            projectConfig = dict(configParser.items(project))
-            config = getDefaultProjectConf()
-            config.update(projectConfig)
+            projectConfig = dict(configParser.items(project)) # Taking all available keys
+            config = getDefaultProjectConf() # Taking default conf
+            # Merging default config with project one, project taking precedence
+            config.update(projectConfig) 
             retVal[project] = config
             
     return retVal
@@ -142,6 +148,9 @@ def handleProject(project, config, globalOptions):
         pullArgs = gitBaseArgs[:]
         pullArgs.append('pull')
         
+        if(getBool(config['pull_ff_only'])):
+            pullArgs.append('--ff-only')
+        
         gitPull = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
         
         printOut(gitPull.communicate())
@@ -179,7 +188,7 @@ def main():
 
 def getBool(value):   
     if(value.__class__ is str):
-        value = value.lower() in ["yes", "true", "t", "1"]
+        value = value.lower() in ["yes", "true", "t", "on", "1"]
     
     return value
         
