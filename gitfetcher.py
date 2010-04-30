@@ -48,9 +48,9 @@ def openConfiguration(specificFile=None):
     
     if len(filesFound) == 0:
         if specificFile is None:
-            printError("No config file found, aborting", os.EX_CONFIG)
+            printErrorExit("No config file found, aborting", os.EX_CONFIG)
         else:
-            printError("Configuration file '%s' not found, aborting" % specificFile, os.EX_CONFIG)
+            printErrorExit("Configuration file '%s' not found, aborting" % specificFile, os.EX_CONFIG)
                 
     else:
         printOK("Reading projects from : '%s'" % ', '.join(filesFound))
@@ -165,6 +165,10 @@ def main():
     openConfiguration(options.config)
     readConfiguration()
     
+    # Check that git executable exists before doing anything
+    if not os.path.exists(configuration['git_bin']):
+        printErrorExit("Unable to find the git binary, please fix you 'git_bin' option in configuration", os.EX_CONFIG)
+    
     allProjects = readProjects()
     
     if len(allProjects) == 0:
@@ -181,7 +185,7 @@ def main():
         """
         for project in args:
             if project not in allProjects:
-                printError("Project '%s' doesn't exists in configuration file" % project, os.EX_CONFIG)
+                printErrorExit("Project '%s' doesn't exists in configuration file" % project, os.EX_CONFIG)
                 
         for project in args:
             handleProject(project, allProjects[project], options)
@@ -192,7 +196,7 @@ def getBool(value):
     
     return value
         
-def printError(message, errorCode=1, prefix=''):
+def printErrorExit(message, errorCode=1, prefix=''):
     printColor(message, "ERROR", "red", prefix, sys.stderr)
     exit(errorCode)
     
