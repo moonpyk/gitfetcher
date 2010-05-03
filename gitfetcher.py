@@ -194,7 +194,7 @@ def main():
             handleProject(project, allProjects[project], options)
 
 def getBool(value):   
-    if(value.__class__ is str):
+    if isinstance(value, str):
         value = value.lower() in ["yes", "true", "t", "on", "1"]
     
     return value
