@@ -214,9 +214,10 @@ def printOK(message, prefix=''):
 
 def printOut(out):
     if(getBool(configuration['print_git_out'])):
-        if(len(out) == 2):
-            if out[0] != '': print(out[0].strip())
-            if out[1] != '': print(out[1].strip())
+        if(not isinstance(out, str)):
+            if(len(out) == 2):
+                if out[0] != '': print(out[0].strip())
+                if out[1] != '': print(out[1].strip())
         
         else:
             print(out.strip())
