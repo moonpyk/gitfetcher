@@ -10,6 +10,8 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
+version = "0.2.2"
+
 __author__ = 'Clément Bourgeois'
 
 _e = os.path.expanduser
@@ -21,10 +23,13 @@ _e('~/.gitfetcher.cfg'),
 )
 
 configParser = ConfigParser()
-optionsParser = OptionParser(version='%prog 0.2.1', usage='%prog [options] [project...]')
+optionsParser = OptionParser(
+        version = '%prog' + ' %s' % version,
+        usage = '%prog [options] [project...]'
+        )
 
-optionsParser.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
-optionsParser.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
+optionsParser.add_option('-x', '--context', dest = 'context', help = 'Run inside context CONTEXT')
+optionsParser.add_option('-c', '--config', dest = 'config', help = 'Force use of specific config file FILE')
 
 configuration = {
     'base_path': '',
@@ -43,7 +48,7 @@ configuration = {
     # TODO: 'default_aggressive_gc_interval' : 0
 }
 
-def openConfiguration(specificFile=None):
+def openConfiguration(specificFile = None):
     filesToRead = CONFIGURATION_PLACES
 
     if(specificFile is not None):
@@ -146,7 +151,7 @@ def handleProject(project, config, globalOptions):
     printInfo("Fetching%s..." % fetchInfo, ' ' * 2)
 
     try:
-        gitFetch = Popen(fetchArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+        gitFetch = Popen(fetchArgs, cwd = projectPath, stdout = PIPE, stderr = PIPE)
 
     except OSError:
         printError("Unable to open project %s" % project, ' ' * 2)
@@ -164,7 +169,7 @@ def handleProject(project, config, globalOptions):
         if(getBool(config['pull_ff_only'])):
             pullArgs.append('--ff-only')
 
-        gitPullProcess = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+        gitPullProcess = Popen(pullArgs, cwd = projectPath, stdout = PIPE, stderr = PIPE)
 
         printOut(gitPullProcess.communicate())
 
@@ -207,20 +212,20 @@ def getBool(value):
 
     return value
 
-def printError(message, prefix=''):
+def printError(message, prefix = ''):
     printColor(message, "ERROR", "red", prefix, sys.stderr)
 
-def printErrorExit(message, errorCode=1, prefix=''):
+def printErrorExit(message, errorCode = 1, prefix = ''):
     printError(message, prefix)
     exit(errorCode)
 
-def printWarning(message, prefix=''):
+def printWarning(message, prefix = ''):
     printColor(message, "WARN", "yellow", prefix)
 
-def printInfo(message, prefix=''):
+def printInfo(message, prefix = ''):
     printColor(message, "INFO", "blue", prefix)
 
-def printOK(message, prefix=''):
+def printOK(message, prefix = ''):
     printColor(message, "OK", "green", prefix)
 
 def printOut(out):
@@ -233,10 +238,10 @@ def printOut(out):
         else:
             print(out.strip())
 
-def printColor(message, type, color, prefix='', out=sys.stdout):
-    type = colored(type, color, attrs=("bold",)) if canUseColors() else type
+def printColor(message, type, color, prefix = '', out = sys.stdout):
+    type = colored(type, color, attrs = ("bold",)) if canUseColors() else type
 
-    print("%s[ %s ] %s" % (prefix, type, message), file=out)
+    print("%s[ %s ] %s" % (prefix, type, message), file = out)
 
 def canUseColors():
     if hasattr(sys.stderr, "fileno"): # Thanks to René 'Necoro' Neumann
