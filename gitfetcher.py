@@ -10,6 +10,8 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
+__author__ = 'Clément Bourgeois'
+
 _e = os.path.expanduser
 
 OPTION_SECTION_NAME = 'configuration'
