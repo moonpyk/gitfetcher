@@ -10,7 +10,7 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
-version = "0.2.2"
+__version__ = "0.2.3"
 
 __author__ = 'Clément Bourgeois'
 
@@ -24,7 +24,7 @@ _e('~/.gitfetcher.cfg'),
 
 configParser = ConfigParser()
 optionsParser = OptionParser(
-        version = '%prog' + ' %s' % version,
+        version = '%prog' + ' %s' % __version__,
         usage = '%prog [options] [project...]'
         )
 
