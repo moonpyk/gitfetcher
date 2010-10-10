@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2008-2009 Konstantin Lepa <konstantin.lepa@gmail.com>.
 #
 # This file is part of termcolor.
