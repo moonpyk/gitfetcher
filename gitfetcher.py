@@ -103,6 +103,7 @@ def handleProject(project, config, globalOptions):
     if 'path' not in config:
         printWarning("No 'path' configuration specied for project '%s', skipping..")
         return
+
     else:
         printInfo("Current project is '%s'" % project)
 
@@ -113,7 +114,7 @@ def handleProject(project, config, globalOptions):
             return
 
         # Is this project enabled ?
-    if getBool(config['enabled']) == False:
+    if not getBool(config['enabled']):
         printInfo("Skipping project which is not enabled", ' ' * 2)
         return
 
@@ -127,11 +128,13 @@ def handleProject(project, config, globalOptions):
     fetchArgs.append('fetch')
 
     all = getBool(config['fetch_all'])
+
     if all:
         fetchArgs.append('--all')
         fetchInfo += " all"
 
     tags = getBool(config['fetch_tags'])
+
     if tags:
         fetchArgs.append('--tags')
         fetchInfo += " tags"
@@ -144,9 +147,10 @@ def handleProject(project, config, globalOptions):
 
     try:
         gitFetch = Popen(fetchArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+
     except OSError:
-        printError("Unable to open project %s" % project, ' ' * 2);
-        return;
+        printError("Unable to open project %s" % project, ' ' * 2)
+        return
 
     printOut(gitFetch.communicate())
     printOK("Fetching done", ' ' * 2)
@@ -160,9 +164,9 @@ def handleProject(project, config, globalOptions):
         if(getBool(config['pull_ff_only'])):
             pullArgs.append('--ff-only')
 
-        gitPull = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+        gitPullProcess = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
 
-        printOut(gitPull.communicate())
+        printOut(gitPullProcess.communicate())
 
         printOK("Pulling done", ' ' * 2)
 
@@ -188,10 +192,8 @@ def main():
         handleAllProjects(allProjects, options)
 
     else:
-        """ 
-        Specific project(s) given
-        Before doing anything, checking that all projects have a configuration
-        """
+    # Specific project(s) given
+    # Before doing anything, checking that all projects have a configuration
         for project in args:
             if project not in allProjects:
                 printErrorExit("Project '%s' doesn't exists in configuration file" % project, os.EX_CONFIG)
@@ -205,11 +207,11 @@ def getBool(value):
 
     return value
 
-def printError(message, prefix):
+def printError(message, prefix=''):
     printColor(message, "ERROR", "red", prefix, sys.stderr)
 
 def printErrorExit(message, errorCode=1, prefix=''):
-    printError(message)
+    printError(message, prefix)
     exit(errorCode)
 
 def printWarning(message, prefix=''):
