@@ -10,7 +10,7 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 __author__ = 'Clément Bourgeois'
 
