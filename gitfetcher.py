@@ -118,7 +118,7 @@ def handleProject(project, config, globalOptions):
             printInfo("Skipping project not in current context '%s'" % globalOptions.context, '\t')
             return
 
-            # Is this project enabled ?
+    # Is this project enabled ?
     if not getBool(config['enabled']):
         printInfo("Skipping project which is not enabled", ' ' * 2)
         return
