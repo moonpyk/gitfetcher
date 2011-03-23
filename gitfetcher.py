@@ -186,6 +186,7 @@ def handleProject(project, config, globalOptions):
 
         # TODO: GC
 
+
 def main():
     (options, args) = optionsParser.parse_args()
 
