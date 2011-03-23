@@ -10,26 +10,32 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
-__version__ = "0.2.3"
+__version__ = "0.3.0"
 
 __author__ = 'Clément Bourgeois'
 
 _e = os.path.expanduser
 
+if os.name == 'posix':
+    errorCode = os.EX_CONFIG
+else:
+    errorCode = 78
+
 OPTION_SECTION_NAME = 'configuration'
 CONFIGURATION_PLACES = (
 'gitfetcher.cfg',
-_e('~/.gitfetcher.cfg'),
+_e('~/.gitfetcher.cfg'), # Posix
+_e('~/gitfetcher.ini'), # Nt
 )
 
 configParser = ConfigParser()
 optionsParser = OptionParser(
-        version = '%prog' + ' %s' % __version__,
-        usage = '%prog [options] [project...]'
-        )
+    version='%prog' + ' %s' % __version__,
+    usage='%prog [options] [project...]'
+)
 
-optionsParser.add_option('-x', '--context', dest = 'context', help = 'Run inside context CONTEXT')
-optionsParser.add_option('-c', '--config', dest = 'config', help = 'Force use of specific config file FILE')
+optionsParser.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
+optionsParser.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
 
 configuration = {
     'base_path': '',
@@ -48,22 +54,23 @@ configuration = {
     # TODO: 'default_aggressive_gc_interval' : 0
 }
 
-def openConfiguration(specificFile = None):
+def openConfiguration(specificFile=None):
     filesToRead = CONFIGURATION_PLACES
 
-    if(specificFile is not None):
+    if specificFile is not None:
         filesToRead = specificFile
 
     filesFound = configParser.read(filesToRead)
 
-    if len(filesFound) == 0:
+    if not len(filesFound):
         if specificFile is None:
-            printErrorExit("No config file found, aborting", os.EX_CONFIG)
+            printErrorExit("No config file found, aborting", errorCode)
         else:
-            printErrorExit("Configuration file '%s' not found, aborting" % specificFile, os.EX_CONFIG)
+            printErrorExit("Configuration file '%s' not found, aborting" % specificFile, errorCode)
 
     else:
         printOK("Reading projects from : '%s'" % ', '.join(filesFound))
+
 
 def readConfiguration():
     if OPTION_SECTION_NAME in configParser.sections():
@@ -73,16 +80,18 @@ def readConfiguration():
     else:
         printWarning("No gitfetcher configuration section found. Using default one")
 
+
 def getDefaultProjectConfig():
     retVal = {}
 
     # All keys beginning by "default_" are default project configuration
     for key, value in list(configuration.items()):
-        if(key.startswith('default_')):
+        if key.startswith('default_'):
         # Removing the beginning of the key, it's now a valid project conf
             retVal[key.replace('default_', '')] = value
 
     return retVal
+
 
 def readProjects():
     retVal = {}
@@ -97,14 +106,16 @@ def readProjects():
 
     return retVal
 
+
 def handleAllProjects(projects, globalOptions):
     for project, config in list(projects.items()):
         handleProject(project, config, globalOptions)
 
+
 def handleProject(project, config, globalOptions):
 #print('\t', project, config)
 
-# Checking very basic config
+    # Checking very basic config
     if 'path' not in config:
         printWarning("No 'path' configuration specied for project '%s', skipping..")
         return
@@ -118,7 +129,7 @@ def handleProject(project, config, globalOptions):
             printInfo("Skipping project not in current context '%s'" % globalOptions.context, '\t')
             return
 
-        # Is this project enabled ?
+    # Is this project enabled ?
     if not getBool(config['enabled']):
         printInfo("Skipping project which is not enabled", ' ' * 2)
         return
@@ -145,13 +156,13 @@ def handleProject(project, config, globalOptions):
         fetchInfo += " tags"
 
     fetchInfo = fetchInfo.strip()
-    if(fetchInfo != ''):
+    if fetchInfo != '':
         fetchInfo = ' [%s]' % fetchInfo.replace(' ', ', ')
 
     printInfo("Fetching%s..." % fetchInfo, ' ' * 2)
 
     try:
-        gitFetch = Popen(fetchArgs, cwd = projectPath, stdout = PIPE, stderr = PIPE)
+        gitFetch = Popen(fetchArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
 
     except OSError:
         printError("Unable to open project %s" % project, ' ' * 2)
@@ -166,16 +177,17 @@ def handleProject(project, config, globalOptions):
         pullArgs = gitBaseArgs[:]
         pullArgs.append('pull')
 
-        if(getBool(config['pull_ff_only'])):
+        if getBool(config['pull_ff_only']):
             pullArgs.append('--ff-only')
 
-        gitPullProcess = Popen(pullArgs, cwd = projectPath, stdout = PIPE, stderr = PIPE)
+        gitPullProcess = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
 
         printOut(gitPullProcess.communicate())
 
         printOK("Pulling done", ' ' * 2)
 
-    # TODO: GC
+        # TODO: GC
+
 
 def main():
     (options, args) = optionsParser.parse_args()
@@ -185,14 +197,14 @@ def main():
 
     # Check that git executable exists before doing anything
     if not os.path.exists(configuration['git_bin']):
-        printErrorExit("Unable to find the git binary, please fix you 'git_bin' option in configuration", os.EX_CONFIG)
+        printErrorExit("Unable to find the git binary, please fix you 'git_bin' option in configuration", errorCode)
 
     allProjects = readProjects()
 
-    if len(allProjects) == 0:
+    if not len(allProjects):
         printWarning("No project found in configuration")
 
-    if len(args) == 0:
+    if not len(args):
     # Taking all projects
         handleAllProjects(allProjects, options)
 
@@ -201,10 +213,11 @@ def main():
     # Before doing anything, checking that all projects have a configuration
         for project in args:
             if project not in allProjects:
-                printErrorExit("Project '%s' doesn't exists in configuration file" % project, os.EX_CONFIG)
+                printErrorExit("Project '%s' doesn't exists in configuration file" % project, errorCode)
 
         for project in args:
             handleProject(project, allProjects[project], options)
+
 
 def getBool(value):
     if isinstance(value, str):
@@ -212,38 +225,49 @@ def getBool(value):
 
     return value
 
-def printError(message, prefix = ''):
+
+def printError(message, prefix=''):
     printColor(message, "ERROR", "red", prefix, sys.stderr)
 
-def printErrorExit(message, errorCode = 1, prefix = ''):
-    printError(message, prefix)
-    exit(errorCode)
 
-def printWarning(message, prefix = ''):
+def printErrorExit(message, errorCode=1, prefix=''):
+    printError(message, prefix)
+    sys.exit(errorCode)
+
+
+def printWarning(message, prefix=''):
     printColor(message, "WARN", "yellow", prefix)
 
-def printInfo(message, prefix = ''):
+
+def printInfo(message, prefix=''):
     printColor(message, "INFO", "blue", prefix)
 
-def printOK(message, prefix = ''):
+
+def printOK(message, prefix=''):
     printColor(message, "OK", "green", prefix)
 
+
 def printOut(out):
-    if(getBool(configuration['print_git_out'])):
-        if(not isinstance(out, str)):
-            if(len(out) == 2):
+    if getBool(configuration['print_git_out']):
+        if not isinstance(out, str):
+            if len(out) == 2:
                 if out[0] != '': print(out[0].strip())
                 if out[1] != '': print(out[1].strip())
 
         else:
             print(out.strip())
 
-def printColor(message, type, color, prefix = '', out = sys.stdout):
-    type = colored(type, color, attrs = ("bold",)) if canUseColors() else type
 
-    print("%s[ %s ] %s" % (prefix, type, message), file = out)
+def printColor(message, type, color, prefix='', out=sys.stdout):
+    type = colored(type, color, attrs=("bold",)) if canUseColors() else type
+
+    print("%s[ %s ] %s" % (prefix, type, message), file=out)
+
 
 def canUseColors():
+    if os.name == "nt":
+        return False
+
     if hasattr(sys.stderr, "fileno"): # Thanks to René 'Necoro' Neumann
         return os.isatty(sys.stderr.fileno())
 
