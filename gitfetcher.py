@@ -24,8 +24,8 @@ else:
 OPTION_SECTION_NAME = 'configuration'
 CONFIGURATION_PLACES = (
 'gitfetcher.cfg',
-_e('~/.gitfetcher.cfg'), # Posix
-_e('~/gitfetcher.ini'), # Nt
+_e('~/.gitfetcher.cfg'), # POSIX
+_e('~/gitfetcher.ini'), # NT
 )
 
 configParser = ConfigParser()
@@ -115,7 +115,7 @@ def handleAllProjects(projects, globalOptions):
 def handleProject(project, config, globalOptions):
     # Checking very basic config
     if 'path' not in config:
-        printWarning("No 'path' configuration specied for project '%s', skipping..")
+        printWarning("No 'path' configuration specified for project '%s', skipping..")
         return
 
     else:
@@ -270,7 +270,7 @@ def canUseColors():
     if os.name == "nt":
         return False
 
-    if hasattr(sys.stderr, "fileno"): # Thanks to René 'Necoro' Neumann
+    if hasattr(sys.stderr, 'fileno'): # Thanks to René 'Necoro' Neumann
         return os.isatty(sys.stderr.fileno())
 
     return False
