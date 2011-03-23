@@ -113,8 +113,6 @@ def handleAllProjects(projects, globalOptions):
 
 
 def handleProject(project, config, globalOptions):
-#print('\t', project, config)
-
     # Checking very basic config
     if 'path' not in config:
         printWarning("No 'path' configuration specied for project '%s', skipping..")
@@ -188,7 +186,6 @@ def handleProject(project, config, globalOptions):
 
         # TODO: GC
 
-
 def main():
     (options, args) = optionsParser.parse_args()
 
@@ -205,12 +202,12 @@ def main():
         printWarning("No project found in configuration")
 
     if not len(args):
-    # Taking all projects
+        # Taking all projects
         handleAllProjects(allProjects, options)
 
     else:
-    # Specific project(s) given
-    # Before doing anything, checking that all projects have a configuration
+        # Specific project(s) given
+        # Before doing anything, checking that all projects have a configuration
         for project in args:
             if project not in allProjects:
                 printErrorExit("Project '%s' doesn't exists in configuration file" % project, errorCode)
