@@ -10,7 +10,7 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __author__ = 'Clément Bourgeois'
 
@@ -132,7 +132,11 @@ def handleProject(project, config, globalOptions):
         printInfo("Skipping project which is not enabled", ' ' * 2)
         return
 
-    projectPath = _e(configuration['base_path'] + config['path'])
+    # Maybe the project path is a real one, trying...
+    if os.path.exists(config['path']):
+        projectPath = config['path']
+    else:
+        projectPath = _e(configuration['base_path'] + config['path'])
 
     gitBaseArgs = [configuration['git_bin']]
 
