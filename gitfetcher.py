@@ -5,28 +5,41 @@ from __future__ import print_function
 
 import os, sys
 
-from termcolor import colored
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
-__version__ = "0.3.1"
+_canUseColors = False
+
+# Trying to enable coloring
+try:
+    import colorama
+    import termcolor
+
+    colorama.init()
+    _canUseColors = True
+
+except ImportError:
+    pass
+
+__version__ = "0.4.0"
 
 __author__ = 'Clément Bourgeois'
 
 _e = os.path.expanduser
 
 if os.name == 'posix':
-    errorCode = os.EX_CONFIG
+    #noinspection PyUnresolvedReferences
+    _configErrCode = os.EX_CONFIG
 else:
-    errorCode = 78
+    _configErrCode = 78
 
 OPTION_SECTION_NAME = 'configuration'
 CONFIGURATION_PLACES = (
-'gitfetcher.cfg',
-_e('~/.gitfetcher.cfg'), # Posix
-_e('~/gitfetcher.ini'), # Nt
-)
+    'gitfetcher.cfg',
+    _e('~/.gitfetcher.cfg'), # Posix
+    _e('~/gitfetcher.ini'), # Nt
+    )
 
 configParser = ConfigParser()
 optionsParser = OptionParser(
@@ -36,11 +49,15 @@ optionsParser = OptionParser(
 
 optionsParser.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
 optionsParser.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
+optionsParser.add_option('-N', '--no-color', dest='nocolor', help='Disable output-coloring even if available',
+    default=False, action='store_true')
 
 configuration = {
     'base_path': '',
     'git_bin': '/usr/bin/git',
     'print_git_out': True,
+    'exit_on_fail': False,
+    'readline_on_fail': False,
     # TODO: 'write_log' : False,
     'default_enabled': True,
     'default_context': None,
@@ -49,7 +66,7 @@ configuration = {
     'default_pull': False,
     'default_pull_ff_only': True,
     'default_force_gc': False,
-    'default_force_gc_agressive': False,
+    'default_force_gc_aggressive': False,
     # TODO: 'default_gc_interval' : 5,
     # TODO: 'default_aggressive_gc_interval' : 0
 }
@@ -64,9 +81,9 @@ def openConfiguration(specificFile=None):
 
     if not len(filesFound):
         if specificFile is None:
-            printErrorExit("No config file found, aborting", errorCode)
+            printErrorExitForce("No config file found, aborting", _configErrCode)
         else:
-            printErrorExit("Configuration file '%s' not found, aborting" % specificFile, errorCode)
+            printErrorExitForce("Configuration file '%s' not found, aborting" % specificFile, _configErrCode)
 
     else:
         printOK("Reading projects from : '%s'" % ', '.join(filesFound))
@@ -112,20 +129,31 @@ def handleAllProjects(projects, globalOptions):
         handleProject(project, config, globalOptions)
 
 
+def doGarbageCollect(gitBaseArgs, projectPath, aggressive):
+    gcArgs = gitBaseArgs[:]
+    gcArgs.append('gc')
+
+    if aggressive:
+        gcArgs.append('--aggressive')
+
+    gitForceGcProcess = Popen(gcArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+    printOut(gitForceGcProcess.communicate())
+    printOK('Garbage collecting is done', ' ' * 2)
+
+
 def handleProject(project, config, globalOptions):
     # Checking very basic config
     if 'path' not in config:
-        printWarning("No 'path' configuration specied for project '%s', skipping..")
+        printWarning("No 'path' configuration specified for project '%s', skipping..")
         return
 
     else:
         printInfo("Current project is '%s'" % project)
 
     # Is this right context ?
-    if config['context'] is not None:
-        if config['context'] != globalOptions.context:
-            printInfo("Skipping project not in current context '%s'" % globalOptions.context, '\t')
-            return
+    if config['context'] is not None and config['context'] != globalOptions.context:
+        printInfo("Skipping project not in current context '%s'" % globalOptions.context, '\t')
+        return
 
     # Is this project enabled ?
     if not getBool(config['enabled']):
@@ -171,7 +199,10 @@ def handleProject(project, config, globalOptions):
         return
 
     printOut(gitFetch.communicate())
-    printOK("Fetching done", ' ' * 2)
+    if not gitFetch.returncode:
+        printOK("Fetching done", ' ' * 2)
+    else:
+        printError("Error during fetch", ' ' * 2)
 
     # PULL
     if getBool(config['pull']):
@@ -188,18 +219,27 @@ def handleProject(project, config, globalOptions):
 
         printOK("Pulling done", ' ' * 2)
 
-        # TODO: GC
+        if getBool(config['force_gc']):
+            printInfo('Forced garbage collect is enabled, doing it', ' ' * 2)
+            aggressive = getBool(config['force_gc_aggressive'])
+
+            doGarbageCollect(gitBaseArgs, projectPath, aggressive)
 
 
 def main():
     (options, args) = optionsParser.parse_args()
+
+    global _canUseColors
+    if options.nocolor:
+        _canUseColors = False
 
     openConfiguration(options.config)
     readConfiguration()
 
     # Check that git executable exists before doing anything
     if not os.path.exists(configuration['git_bin']):
-        printErrorExit("Unable to find the git binary, please fix you 'git_bin' option in configuration", errorCode)
+        printErrorExitForce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
+            _configErrCode)
 
     allProjects = readProjects()
 
@@ -215,25 +255,32 @@ def main():
         # Before doing anything, checking that all projects have a configuration
         for project in args:
             if project not in allProjects:
-                printErrorExit("Project '%s' doesn't exists in configuration file" % project, errorCode)
+                printErrorExitForce("Project '%s' doesn't exists in configuration file" % project, _configErrCode)
 
         for project in args:
             handleProject(project, allProjects[project], options)
 
 
 def getBool(value):
+    retVal = value
     if isinstance(value, str):
-        value = value.lower() in ["yes", "true", "t", "on", "1"]
+        retVal = value.lower() in ["yes", "true", "t", "on", "1"]
 
-    return value
-
-
-def printError(message, prefix=''):
-    printColor(message, "ERROR", "red", prefix, sys.stderr)
+    return retVal
 
 
-def printErrorExit(message, errorCode=1, prefix=''):
-    printError(message, prefix)
+def printError(message, prefix='', ignoreExitForce=False):
+    if getBool(configuration['exit_on_fail']) and not ignoreExitForce:
+        printErrorExitForce(message, prefix=prefix)
+    else:
+        printColor(message, "ERROR", "red", prefix, sys.stderr)
+
+
+def printErrorExitForce(message, errorCode=1, prefix=''):
+    printError(message, prefix, True)
+    if getBool(configuration['readline_on_fail']):
+        raw_input()
+
     sys.exit(errorCode)
 
 
@@ -261,20 +308,12 @@ def printOut(out):
 
 
 def printColor(message, type, color, prefix='', out=sys.stdout):
-    type = colored(type, color, attrs=("bold",)) if canUseColors() else type
+    coloredType = type
 
-    print("%s[ %s ] %s" % (prefix, type, message), file=out)
+    if _canUseColors:
+        coloredType = termcolor.colored(type, color, attrs=("bold",))
 
-
-def canUseColors():
-    if os.name == "nt":
-        return False
-
-    if hasattr(sys.stderr, "fileno"): # Thanks to René 'Necoro' Neumann
-        return os.isatty(sys.stderr.fileno())
-
-    return False
+    print("%s[ %s ] %s" % (prefix, coloredType, message), file=out)
 
 if __name__ == '__main__':
     main()
-
