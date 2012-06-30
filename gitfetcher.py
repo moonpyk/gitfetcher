@@ -58,6 +58,7 @@ configuration = {
     'print_git_out': True,
     'exit_on_fail': False,
     'readline_on_fail': False,
+    'readline_on_finish': False,
     # TODO: 'write_log' : False,
     'default_enabled': True,
     'default_context': None,
@@ -259,6 +260,9 @@ def main():
 
         for project in args:
             handleProject(project, allProjects[project], options)
+
+    if configuration['readline_on_finish']:
+        raw_input()
 
 
 def getBool(value):
