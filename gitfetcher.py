@@ -1,30 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+__version__ = "0.4.1"
+__author__ = 'Clément Bourgeois'
 
-import os, sys
-
+import os
+import output as o
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
-
-_canUseColors = False
-
-# Trying to enable coloring
-try:
-    import colorama
-    import termcolor
-
-    colorama.init()
-    _canUseColors = True
-
-except ImportError:
-    pass
-
-__version__ = "0.4.0"
-
-__author__ = 'Clément Bourgeois'
 
 _e = os.path.expanduser
 
@@ -36,7 +20,7 @@ else:
 
 OPTION_SECTION_NAME = 'configuration'
 CONFIGURATION_PLACES = (
-    'gitfetcher.cfg',
+    'gitfetcher.cfg', # Current dir, all platforms
     _e('~/.gitfetcher.cfg'), # Posix
     _e('~/gitfetcher.ini'), # Nt
     )
@@ -82,12 +66,12 @@ def openConfiguration(specificFile=None):
 
     if not len(filesFound):
         if specificFile is None:
-            printErrorExitForce("No config file found, aborting", _configErrCode)
+            o.errorExitForce("No config file found, aborting", _configErrCode)
         else:
-            printErrorExitForce("Configuration file '%s' not found, aborting" % specificFile, _configErrCode)
+            o.errorExitForce("Configuration file '%s' not found, aborting" % specificFile, _configErrCode)
 
     else:
-        printOK("Reading projects from : '%s'" % ', '.join(filesFound))
+        o.ok("Reading projects from : '%s'" % ', '.join(filesFound))
 
 
 def readConfiguration():
@@ -96,7 +80,7 @@ def readConfiguration():
         configuration.update(configParser.items(OPTION_SECTION_NAME))
 
     else:
-        printWarning("No gitfetcher configuration section found. Using default one")
+        o.warning("No gitfetcher configuration section found. Using default one")
 
 
 def getDefaultProjectConfig():
@@ -138,27 +122,28 @@ def doGarbageCollect(gitBaseArgs, projectPath, aggressive):
         gcArgs.append('--aggressive')
 
     gitForceGcProcess = Popen(gcArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
-    printOut(gitForceGcProcess.communicate())
-    printOK('Garbage collecting is done', ' ' * 2)
+
+    o.out(gitForceGcProcess.communicate())
+    o.ok('Garbage collecting is done', ' ' * 2)
 
 
 def handleProject(project, config, globalOptions):
     # Checking very basic config
     if 'path' not in config:
-        printWarning("No 'path' configuration specified for project '%s', skipping..")
+        o.warning("No 'path' configuration specified for project '%s', skipping..")
         return
 
     else:
-        printInfo("Current project is '%s'" % project)
+        o.info("Current project is '%s'" % project)
 
     # Is this right context ?
     if config['context'] is not None and config['context'] != globalOptions.context:
-        printInfo("Skipping project not in current context '%s'" % globalOptions.context, '\t')
+        o.info("Skipping project not in current context '%s'" % globalOptions.context, '\t')
         return
 
     # Is this project enabled ?
     if not getBool(config['enabled']):
-        printInfo("Skipping project which is not enabled", ' ' * 2)
+        o.info("Skipping project which is not enabled", ' ' * 2)
         return
 
     # Maybe the project path is a real one, trying...
@@ -190,24 +175,25 @@ def handleProject(project, config, globalOptions):
     if fetchInfo != '':
         fetchInfo = ' [%s]' % fetchInfo.replace(' ', ', ')
 
-    printInfo("Fetching%s..." % fetchInfo, ' ' * 2)
+    o.info("Fetching%s..." % fetchInfo, ' ' * 2)
 
     try:
         gitFetch = Popen(fetchArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
 
     except OSError:
-        printError("Unable to open project %s" % project, ' ' * 2)
+        o.error("Unable to open project %s" % project, ' ' * 2)
         return
 
-    printOut(gitFetch.communicate())
+    o.out(gitFetch.communicate())
+
     if not gitFetch.returncode:
-        printOK("Fetching done", ' ' * 2)
+        o.ok("Fetching done", ' ' * 2)
     else:
-        printError("Error during fetch", ' ' * 2)
+        o.error("Error during fetch", ' ' * 2)
 
     # PULL
     if getBool(config['pull']):
-        printInfo("Pulling...", ' ' * 2)
+        o.info("Pulling...", ' ' * 2)
         pullArgs = gitBaseArgs[:]
         pullArgs.append('pull')
 
@@ -216,12 +202,12 @@ def handleProject(project, config, globalOptions):
 
         gitPullProcess = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
 
-        printOut(gitPullProcess.communicate())
+        o.out(gitPullProcess.communicate())
 
-        printOK("Pulling done", ' ' * 2)
+        o.ok("Pulling done", ' ' * 2)
 
         if getBool(config['force_gc']):
-            printInfo('Forced garbage collect is enabled, doing it', ' ' * 2)
+            o.info('Forced garbage collect is enabled, doing it', ' ' * 2)
             aggressive = getBool(config['force_gc_aggressive'])
 
             doGarbageCollect(gitBaseArgs, projectPath, aggressive)
@@ -230,22 +216,21 @@ def handleProject(project, config, globalOptions):
 def main():
     (options, args) = optionsParser.parse_args()
 
-    global _canUseColors
     if options.nocolor:
-        _canUseColors = False
+        o.canUseColors = False
 
     openConfiguration(options.config)
     readConfiguration()
 
     # Check that git executable exists before doing anything
     if not os.path.exists(configuration['git_bin']):
-        printErrorExitForce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
+        o.errorExitForce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
             _configErrCode)
 
     allProjects = readProjects()
 
     if not len(allProjects):
-        printWarning("No project found in configuration")
+        o.warning("No project found in configuration")
 
     if not len(args):
         # Taking all projects
@@ -256,7 +241,7 @@ def main():
         # Before doing anything, checking that all projects have a configuration
         for project in args:
             if project not in allProjects:
-                printErrorExitForce("Project '%s' doesn't exists in configuration file" % project, _configErrCode)
+                o.errorExitForce("Project '%s' doesn't exists in configuration file" % project, _configErrCode)
 
         for project in args:
             handleProject(project, allProjects[project], options)
@@ -264,60 +249,12 @@ def main():
     if configuration['readline_on_finish']:
         raw_input()
 
-
 def getBool(value):
     retVal = value
     if isinstance(value, str):
         retVal = value.lower() in ["yes", "true", "t", "on", "1"]
 
     return retVal
-
-
-def printError(message, prefix='', ignoreExitForce=False):
-    if getBool(configuration['exit_on_fail']) and not ignoreExitForce:
-        printErrorExitForce(message, prefix=prefix)
-    else:
-        printColor(message, "ERROR", "red", prefix, sys.stderr)
-
-
-def printErrorExitForce(message, errorCode=1, prefix=''):
-    printError(message, prefix, True)
-    if getBool(configuration['readline_on_fail']):
-        raw_input()
-
-    sys.exit(errorCode)
-
-
-def printWarning(message, prefix=''):
-    printColor(message, "WARN", "yellow", prefix)
-
-
-def printInfo(message, prefix=''):
-    printColor(message, "INFO", "blue", prefix)
-
-
-def printOK(message, prefix=''):
-    printColor(message, "OK", "green", prefix)
-
-
-def printOut(out):
-    if getBool(configuration['print_git_out']):
-        if not isinstance(out, str):
-            if len(out) == 2:
-                if out[0] != '': print(out[0].strip())
-                if out[1] != '': print(out[1].strip())
-
-        else:
-            print(out.strip())
-
-
-def printColor(message, type, color, prefix='', out=sys.stdout):
-    coloredType = type
-
-    if _canUseColors:
-        coloredType = termcolor.colored(type, color, attrs=("bold",))
-
-    print("%s[ %s ] %s" % (prefix, coloredType, message), file=out)
 
 if __name__ == '__main__':
     main()
