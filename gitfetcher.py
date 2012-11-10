@@ -247,6 +247,8 @@ def main():
             handleProject(project, allProjects[project], options)
 
     if configuration['readline_on_finish']:
+        print("")
+        o.ok("All work is done")
         raw_input()
 
 def getBool(value):
