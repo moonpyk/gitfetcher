@@ -8,7 +8,9 @@ canUseColors = False
 
 # Trying to enable coloring
 try:
+    # noinspection PyUnresolvedReferences
     import colorama
+    # noinspection PyUnresolvedReferences
     import termcolor
 
     colorama.init()
@@ -16,6 +18,7 @@ try:
 
 except ImportError:
     pass
+
 
 def error(message, prefix='', ignoreExitForce=False):
     if getBool(configuration['exit_on_fail']) and not ignoreExitForce:
@@ -32,11 +35,11 @@ def errorExitForce(message, errorCode=1, prefix=''):
     sys.exit(errorCode)
 
 
-def color(message, type, color, prefix='', out=sys.stdout):
-    coloredType = type
+def color(message, messageType, color, prefix='', out=sys.stdout):
+    coloredType = messageType
 
     if canUseColors:
-        coloredType = termcolor.colored(type, color, attrs=("bold",))
+        coloredType = termcolor.colored(messageType, color, attrs=("bold",))
 
     print("%s[ %s ] %s" % (prefix, coloredType, message), file=out)
 
@@ -57,8 +60,11 @@ def out(out):
     if getBool(configuration['print_git_out']):
         if not isinstance(out, str):
             if len(out) == 2:
-                if out[0] != '': print(out[0].strip())
-                if out[1] != '': print(out[1].strip())
+                if out[0] != '':
+                    print(out[0].strip())
+
+                if out[1] != '':
+                    print(out[1].strip())
 
         else:
             print(out.strip())
