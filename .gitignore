@@ -1,6 +1,6 @@
 *.pyc
 .DS_Store
-.idea/workspace.xml
-dist/*
+.idea
 build/*
+dist/*
 MANIFEST

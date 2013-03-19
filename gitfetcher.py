@@ -20,10 +20,10 @@ else:
 
 OPTION_SECTION_NAME = 'configuration'
 CONFIGURATION_PLACES = (
-    'gitfetcher.cfg', # Current dir, all platforms
-    _e('~/.gitfetcher.cfg'), # Posix
-    _e('~/gitfetcher.ini'), # Nt
-    )
+    'gitfetcher.cfg',         # Current dir, all platforms
+    _e('~/.gitfetcher.cfg'),  # Posix
+    _e('~/gitfetcher.ini'),   # Nt
+)
 
 configParser = ConfigParser()
 optionsParser = OptionParser(
@@ -34,7 +34,7 @@ optionsParser = OptionParser(
 optionsParser.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
 optionsParser.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
 optionsParser.add_option('-N', '--no-color', dest='nocolor', help='Disable output-coloring even if available',
-    default=False, action='store_true')
+                         default=False, action='store_true')
 
 configuration = {
     'base_path': '',
@@ -55,6 +55,7 @@ configuration = {
     # TODO: 'default_gc_interval' : 5,
     # TODO: 'default_aggressive_gc_interval' : 0
 }
+
 
 def openConfiguration(specificFile=None):
     filesToRead = CONFIGURATION_PLACES
@@ -100,8 +101,8 @@ def readProjects():
 
     for project in configParser.sections():
         if project != OPTION_SECTION_NAME:
-            projectConfig = dict(configParser.items(project)) # Taking all available keys
-            config = getDefaultProjectConfig() # Taking default conf
+            projectConfig = dict(configParser.items(project))  # Taking all available keys
+            config = getDefaultProjectConfig()  # Taking default conf
             # Merging default config with project one, project taking precedence
             config.update(projectConfig)
             retVal[project] = config
@@ -159,9 +160,9 @@ def handleProject(project, config, globalOptions):
     fetchArgs = gitBaseArgs[:]
     fetchArgs.append('fetch')
 
-    all = getBool(config['fetch_all'])
+    fetchAll = getBool(config['fetch_all'])
 
-    if all:
+    if fetchAll:
         fetchArgs.append('--all')
         fetchInfo += " all"
 
@@ -225,7 +226,7 @@ def main():
     # Check that git executable exists before doing anything
     if not os.path.exists(configuration['git_bin']):
         o.errorExitForce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
-            _configErrCode)
+                         _configErrCode)
 
     allProjects = readProjects()
 
@@ -251,12 +252,14 @@ def main():
         o.ok("All work is done")
         raw_input()
 
+
 def getBool(value):
     retVal = value
     if isinstance(value, str):
         retVal = value.lower() in ["yes", "true", "t", "on", "1"]
 
     return retVal
+
 
 if __name__ == '__main__':
     main()
