@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __author__ = 'Clément Bourgeois'
 
 import os
@@ -10,31 +10,31 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 from subprocess import Popen, PIPE
 
-_e = os.path.expanduser
+E_ = os.path.expanduser
 
 if os.name == 'posix':
     #noinspection PyUnresolvedReferences
-    _configErrCode = os.EX_CONFIG
+    CONF_ERRCODE = os.EX_CONFIG
 else:
-    _configErrCode = 78
+    CONF_ERRCODE = 78
 
 OPTION_SECTION_NAME = 'configuration'
 CONFIGURATION_PLACES = (
     'gitfetcher.cfg',         # Current dir, all platforms
-    _e('~/.gitfetcher.cfg'),  # Posix
-    _e('~/gitfetcher.ini'),   # Nt
+    E_('~/.gitfetcher.cfg'),  # Posix
+    E_('~/gitfetcher.ini'),   # Nt
 )
 
-configParser = ConfigParser()
-optionsParser = OptionParser(
+CONFIG_PARSER = ConfigParser()
+OPT_PARSER = OptionParser(
     version='%prog' + ' %s' % __version__,
     usage='%prog [options] [project...]'
 )
 
-optionsParser.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
-optionsParser.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
-optionsParser.add_option('-N', '--no-color', dest='nocolor', help='Disable output-coloring even if available',
-                         default=False, action='store_true')
+OPT_PARSER.add_option('-x', '--context', dest='context', help='Run inside context CONTEXT')
+OPT_PARSER.add_option('-c', '--config', dest='config', help='Force use of specific config file FILE')
+OPT_PARSER.add_option('-N', '--no-color', dest='nocolor', help='Disable output-coloring even if available',
+                      default=False, action='store_true')
 
 configuration = {
     'base_path': '',
@@ -57,78 +57,65 @@ configuration = {
 }
 
 
-def openConfiguration(specificFile=None):
-    filesToRead = CONFIGURATION_PLACES
+def configuration_open(specific_file=None):
+    file_to_read = CONFIGURATION_PLACES
 
-    if specificFile is not None:
-        filesToRead = specificFile
+    if specific_file is not None:
+        file_to_read = specific_file
 
-    filesFound = configParser.read(filesToRead)
+    files_found = CONFIG_PARSER.read(file_to_read)
 
-    if not len(filesFound):
-        if specificFile is None:
-            o.errorExitForce("No config file found, aborting", _configErrCode)
+    if not len(files_found):
+        if specific_file is None:
+            o.error_exitforce("No config file found, aborting", CONF_ERRCODE)
         else:
-            o.errorExitForce("Configuration file '%s' not found, aborting" % specificFile, _configErrCode)
+            o.error_exitforce("Configuration file '%s' not found, aborting" % specific_file, CONF_ERRCODE)
 
     else:
-        o.ok("Reading projects from : '%s'" % ', '.join(filesFound))
+        o.ok("Reading projects from : '%s'" % ', '.join(files_found))
 
 
-def readConfiguration():
-    if OPTION_SECTION_NAME in configParser.sections():
+def configuration_read():
+    if OPTION_SECTION_NAME in CONFIG_PARSER.sections():
     # Merging default configuration with user's one, user's takes precedence
-        configuration.update(configParser.items(OPTION_SECTION_NAME))
+        configuration.update(CONFIG_PARSER.items(OPTION_SECTION_NAME))
 
     else:
         o.warning("No gitfetcher configuration section found. Using default one")
 
 
-def getDefaultProjectConfig():
-    retVal = {}
+def project_config_default():
+    ret = {}
 
     # All keys beginning by "default_" are default project configuration
     for key, value in list(configuration.items()):
         if key.startswith('default_'):
         # Removing the beginning of the key, it's now a valid project conf
-            retVal[key.replace('default_', '')] = value
+            ret[key.replace('default_', '')] = value
 
-    return retVal
+    return ret
 
 
-def readProjects():
-    retVal = {}
+def projects_read():
+    ret = {}
 
-    for project in configParser.sections():
+    for project in CONFIG_PARSER.sections():
         if project != OPTION_SECTION_NAME:
-            projectConfig = dict(configParser.items(project))  # Taking all available keys
-            config = getDefaultProjectConfig()  # Taking default conf
+            project_config = dict(CONFIG_PARSER.items(project))  # Taking all available keys
+            config = project_config_default()  # Taking default conf
             # Merging default config with project one, project taking precedence
-            config.update(projectConfig)
-            retVal[project] = config
+            config.update(project_config)
+            ret[project] = config
 
-    return retVal
+    return ret
 
 
-def handleAllProjects(projects, globalOptions):
+def projects_handle_all(projects, global_opt):
     for project, config in list(projects.items()):
-        handleProject(project, config, globalOptions)
+        project_handle(project, config, global_opt)
 
 
-def doGarbageCollect(gitBaseArgs, projectPath, aggressive):
-    gcArgs = gitBaseArgs[:]
-    gcArgs.append('gc')
-
-    if aggressive:
-        gcArgs.append('--aggressive')
-
-    gitForceGcProcess = Popen(gcArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
-
-    o.out(gitForceGcProcess.communicate())
-    o.ok('Garbage collecting is done', ' ' * 2)
-
-
-def handleProject(project, config, globalOptions):
+def project_handle(project, config, global_opt):
     # Checking very basic config
     if 'path' not in config:
         o.warning("No 'path' configuration specified for project '%s', skipping..")
@@ -138,114 +125,127 @@ def handleProject(project, config, globalOptions):
         o.info("Current project is '%s'" % project)
 
     # Is this right context ?
-    if config['context'] is not None and config['context'] != globalOptions.context:
-        o.info("Skipping project not in current context '%s'" % globalOptions.context, '\t')
+    if config['context'] is not None and config['context'] != global_opt.context:
+        o.info("Skipping project not in current context '%s'" % global_opt.context, '\t')
         return
 
     # Is this project enabled ?
-    if not getBool(config['enabled']):
+    if not get_bool(config['enabled']):
         o.info("Skipping project which is not enabled", ' ' * 2)
         return
 
     # Maybe the project path is a real one, trying...
     if os.path.exists(config['path']):
-        projectPath = config['path']
+        project_path = config['path']
     else:
-        projectPath = _e(configuration['base_path'] + config['path'])
+        project_path = E_(configuration['base_path'] + config['path'])
 
-    gitBaseArgs = [configuration['git_bin']]
+    bargs = [configuration['git_bin']]
 
     # FETCH
-    fetchInfo = ''
-    fetchArgs = gitBaseArgs[:]
-    fetchArgs.append('fetch')
+    fetch_info = ''
+    fetch_args = bargs[:]
+    fetch_args.append('fetch')
 
-    fetchAll = getBool(config['fetch_all'])
+    fetch_all = get_bool(config['fetch_all'])
 
-    if fetchAll:
-        fetchArgs.append('--all')
-        fetchInfo += " all"
+    if fetch_all:
+        fetch_args.append('--all')
+        fetch_info += " all"
 
-    tags = getBool(config['fetch_tags'])
+    tags = get_bool(config['fetch_tags'])
 
     if tags:
-        fetchArgs.append('--tags')
-        fetchInfo += " tags"
+        fetch_args.append('--tags')
+        fetch_info += " tags"
 
-    fetchInfo = fetchInfo.strip()
-    if fetchInfo != '':
-        fetchInfo = ' [%s]' % fetchInfo.replace(' ', ', ')
+    fetch_info = fetch_info.strip()
+    if fetch_info != '':
+        fetch_info = ' [%s]' % fetch_info.replace(' ', ', ')
 
-    o.info("Fetching%s..." % fetchInfo, ' ' * 2)
+    o.info("Fetching%s..." % fetch_info, ' ' * 2)
 
     try:
-        gitFetch = Popen(fetchArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+        p_git_fetch = Popen(fetch_args, cwd=project_path, stdout=PIPE, stderr=PIPE)
 
     except OSError:
         o.error("Unable to open project %s" % project, ' ' * 2)
         return
 
-    o.out(gitFetch.communicate())
+    o.outraw(p_git_fetch.communicate())
 
-    if not gitFetch.returncode:
+    if not p_git_fetch.returncode:
         o.ok("Fetching done", ' ' * 2)
     else:
         o.error("Error during fetch", ' ' * 2)
 
     # PULL
-    if getBool(config['pull']):
+    if get_bool(config['pull']):
         o.info("Pulling...", ' ' * 2)
-        pullArgs = gitBaseArgs[:]
-        pullArgs.append('pull')
+        pull_args = bargs[:]
+        pull_args.append('pull')
 
-        if getBool(config['pull_ff_only']):
-            pullArgs.append('--ff-only')
+        if get_bool(config['pull_ff_only']):
+            pull_args.append('--ff-only')
 
-        gitPullProcess = Popen(pullArgs, cwd=projectPath, stdout=PIPE, stderr=PIPE)
+        p_git_pull = Popen(pull_args, cwd=project_path, stdout=PIPE, stderr=PIPE)
 
-        o.out(gitPullProcess.communicate())
+        o.outraw(p_git_pull.communicate())
 
         o.ok("Pulling done", ' ' * 2)
 
-        if getBool(config['force_gc']):
+        if get_bool(config['force_gc']):
             o.info('Forced garbage collect is enabled, doing it', ' ' * 2)
-            aggressive = getBool(config['force_gc_aggressive'])
+            aggressive = get_bool(config['force_gc_aggressive'])
 
-            doGarbageCollect(gitBaseArgs, projectPath, aggressive)
+            project_gitgc(bargs, project_path, aggressive)
+
+
+def project_gitgc(git_bargs, project_path, aggressive):
+    gc_args = git_bargs[:]
+    gc_args.append('gc')
+
+    if aggressive:
+        gc_args.append('--aggressive')
+
+    p_git_gc = Popen(gc_args, cwd=project_path, stdout=PIPE, stderr=PIPE)
+
+    o.outraw(p_git_gc.communicate())
+    o.ok('Garbage collecting is done', ' ' * 2)
 
 
 def main():
-    (options, args) = optionsParser.parse_args()
+    (options, args) = OPT_PARSER.parse_args()
 
     if options.nocolor:
         o.canUseColors = False
 
-    openConfiguration(options.config)
-    readConfiguration()
+    configuration_open(options.config)
+    configuration_read()
 
     # Check that git executable exists before doing anything
     if not os.path.exists(configuration['git_bin']):
-        o.errorExitForce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
-                         _configErrCode)
+        o.error_exitforce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
+                          CONF_ERRCODE)
 
-    allProjects = readProjects()
+    all_projects = projects_read()
 
-    if not len(allProjects):
+    if not len(all_projects):
         o.warning("No project found in configuration")
 
     if not len(args):
         # Taking all projects
-        handleAllProjects(allProjects, options)
+        projects_handle_all(all_projects, options)
 
     else:
         # Specific project(s) given
         # Before doing anything, checking that all projects have a configuration
         for project in args:
-            if project not in allProjects:
-                o.errorExitForce("Project '%s' doesn't exists in configuration file" % project, _configErrCode)
+            if project not in all_projects:
+                o.error_exitforce("Project '%s' doesn't exists in configuration file" % project, CONF_ERRCODE)
 
         for project in args:
-            handleProject(project, allProjects[project], options)
+            project_handle(project, all_projects[project], options)
 
     if configuration['readline_on_finish']:
         print("")
@@ -253,12 +253,12 @@ def main():
         raw_input()
 
 
-def getBool(value):
-    retVal = value
+def get_bool(value):
+    ret = value
     if isinstance(value, str):
-        retVal = value.lower() in ["yes", "true", "t", "on", "1"]
+        ret = value.lower() in ["yes", "true", "t", "on", "1"]
 
-    return retVal
+    return ret
 
 
 if __name__ == '__main__':

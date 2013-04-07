@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from gitfetcher import configuration, getBool
+from gitfetcher import configuration, get_bool
 
 import sys
 
-canUseColors = False
+CAN_USE_COLORS = False
 
 # Trying to enable coloring
 try:
@@ -14,34 +14,34 @@ try:
     import termcolor
 
     colorama.init()
-    canUseColors = True
+    CAN_USE_COLORS = True
 
 except ImportError:
     pass
 
 
-def error(message, prefix='', ignoreExitForce=False):
-    if getBool(configuration['exit_on_fail']) and not ignoreExitForce:
-        errorExitForce(message, prefix=prefix)
+def error(message, prefix='', ignr_exitforce=False):
+    if get_bool(configuration['exit_on_fail']) and not ignr_exitforce:
+        error_exitforce(message, prefix=prefix)
     else:
         color(message, "ERROR", "red", prefix, sys.stderr)
 
 
-def errorExitForce(message, errorCode=1, prefix=''):
+def error_exitforce(message, errcode=1, prefix=''):
     error(message, prefix, True)
-    if getBool(configuration['readline_on_fail']):
+    if get_bool(configuration['readline_on_fail']):
         raw_input()
 
-    sys.exit(errorCode)
+    sys.exit(errcode)
 
 
-def color(message, messageType, color, prefix='', out=sys.stdout):
-    coloredType = messageType
+def color(message, message_t, colorn, prefix='', out=sys.stdout):
+    colored_type = message_t
 
-    if canUseColors:
-        coloredType = termcolor.colored(messageType, color, attrs=("bold",))
+    if CAN_USE_COLORS:
+        colored_type = termcolor.colored(message_t, colorn, attrs=("bold",))
 
-    print("%s[ %s ] %s" % (prefix, coloredType, message), file=out)
+    print("%s[ %s ] %s" % (prefix, colored_type, message), file=out)
 
 
 def warning(message, prefix=''):
@@ -56,8 +56,8 @@ def ok(message, prefix=''):
     color(message, "OK", "green", prefix)
 
 
-def out(out):
-    if getBool(configuration['print_git_out']):
+def outraw(out):
+    if get_bool(configuration['print_git_out']):
         if not isinstance(out, str):
             if len(out) == 2:
                 if out[0] != '':
