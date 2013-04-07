@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from gitfetcher import configuration, get_bool
+
+try:
+    from gitfetcher import CONFIG, get_bool
+except ImportError:
+    pass
 
 import sys
 
@@ -21,7 +25,7 @@ except ImportError:
 
 
 def error(message, prefix='', ignr_exitforce=False):
-    if get_bool(configuration['exit_on_fail']) and not ignr_exitforce:
+    if get_bool(CONFIG['exit_on_fail']) and not ignr_exitforce:
         error_exitforce(message, prefix=prefix)
     else:
         color(message, "ERROR", "red", prefix, sys.stderr)
@@ -29,7 +33,7 @@ def error(message, prefix='', ignr_exitforce=False):
 
 def error_exitforce(message, errcode=1, prefix=''):
     error(message, prefix, True)
-    if get_bool(configuration['readline_on_fail']):
+    if get_bool(CONFIG['readline_on_fail']):
         raw_input()
 
     sys.exit(errcode)
@@ -57,7 +61,7 @@ def ok(message, prefix=''):
 
 
 def outraw(out):
-    if get_bool(configuration['print_git_out']):
+    if get_bool(CONFIG['print_git_out']):
         if not isinstance(out, str):
             if len(out) == 2:
                 if out[0] != '':

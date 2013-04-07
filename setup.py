@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
-
-from gitfetcher import __version__, __author__
-
-if os.name == 'nt':
-    import py2exe
 
 from distutils.core import setup
+
+try:
+    import py2exe
+except ImportError:
+    pass
+
+from gitfetcher import __version__, __author__
 
 setup(
     name="GitFetcher",

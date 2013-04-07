@@ -36,7 +36,7 @@ OPT_PARSER.add_option('-c', '--config', dest='config', help='Force use of specif
 OPT_PARSER.add_option('-N', '--no-color', dest='nocolor', help='Disable output-coloring even if available',
                       default=False, action='store_true')
 
-configuration = {
+CONFIG = {
     'base_path': '',
     'git_bin': '/usr/bin/git',
     'print_git_out': True,
@@ -78,7 +78,7 @@ def configuration_open(specific_file=None):
 def configuration_read():
     if OPTION_SECTION_NAME in CONFIG_PARSER.sections():
     # Merging default configuration with user's one, user's takes precedence
-        configuration.update(CONFIG_PARSER.items(OPTION_SECTION_NAME))
+        CONFIG.update(CONFIG_PARSER.items(OPTION_SECTION_NAME))
 
     else:
         o.warning("No gitfetcher configuration section found. Using default one")
@@ -88,7 +88,7 @@ def project_config_default():
     ret = {}
 
     # All keys beginning by "default_" are default project configuration
-    for key, value in list(configuration.items()):
+    for key, value in list(CONFIG.items()):
         if key.startswith('default_'):
         # Removing the beginning of the key, it's now a valid project conf
             ret[key.replace('default_', '')] = value
@@ -138,9 +138,9 @@ def project_handle(project, config, global_opt):
     if os.path.exists(config['path']):
         project_path = config['path']
     else:
-        project_path = E_(configuration['base_path'] + config['path'])
+        project_path = E_(CONFIG['base_path'] + config['path'])
 
-    bargs = [configuration['git_bin']]
+    bargs = [CONFIG['git_bin']]
 
     # FETCH
     fetch_info = ''
@@ -224,7 +224,7 @@ def main():
     configuration_read()
 
     # Check that git executable exists before doing anything
-    if not os.path.exists(configuration['git_bin']):
+    if not os.path.exists(CONFIG['git_bin']):
         o.error_exitforce("Unable to find the git binary, please fix you 'git_bin' option in configuration",
                           CONF_ERRCODE)
 
@@ -247,7 +247,7 @@ def main():
         for project in args:
             project_handle(project, all_projects[project], options)
 
-    if configuration['readline_on_finish']:
+    if CONFIG['readline_on_finish']:
         print("")
         o.ok("All work is done")
         raw_input()
