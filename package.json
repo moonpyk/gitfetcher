@@ -1,0 +1,36 @@
+{
+    "name": "gitfetcher",
+    "version": "0.1.0",
+    "description": "A pretty cool utility to fetch/pull from multiple git repositories configured as projects.",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/moonpyk/gitfetcher.git"
+    },
+    "author": {
+        "name": "Clément Bourgeois",
+        "email": "moonpyk@gmail.com",
+        "url": "http://www.moonpyk.net"
+    },
+    "license": "GPLv3",
+    "readmeFilename": "README.md",
+    "dependencies": {
+        "colors": "~0.6.0-1",
+        "commander": "~1.2.0",
+        "underscore": "~1.4.4",
+        "async": "~0.2.9"
+    },
+    "devDependencies": {
+        "grunt-contrib-jshint": "~0.1.1",
+        "grunt-contrib-nodeunit": "~0.1.2",
+        "grunt-contrib-watch": "~0.2.0",
+        "grunt": "~0.4.1"
+    },
+    "bin": {
+        "gitfetcher": "./bin/gitfetcher"
+    },
+    "engines": {
+        "node": ">= 0.8.0"
+    },
+    "preferGlobal": true
+}

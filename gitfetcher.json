@@ -1,0 +1,14 @@
+{
+    "defaults": {
+        "git_bin": "/opt/local/bin/git",
+        "print_git_out": true
+    },
+    "Qt 4.6": {
+        "path": "qt",
+        "pull": true
+    },
+    "Qt 4.7": {
+        "path": "qt47",
+        "pull": true
+    }
+}
