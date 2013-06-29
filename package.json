@@ -7,12 +7,8 @@
         "type": "git",
         "url": "https://github.com/moonpyk/gitfetcher.git"
     },
-    "author": {
-        "name": "Clément Bourgeois",
-        "email": "moonpyk@gmail.com",
-        "url": "http://www.moonpyk.net"
-    },
-    "license": "GPLv3",
+    "author": "Clément Bourgeois <moonpyk@gmail.com> (http://www.moonpyk.net)",
+    "license": "MIT",
     "readmeFilename": "README.md",
     "dependencies": {
         "colors": "~0.6.0-1",
@@ -33,6 +29,16 @@
     "engines": {
         "node": ">= 0.8.0"
     },
-    "keywords": ["git", "util", "cli"],
-    "preferGlobal": true
+    "keywords": [
+        "git",
+        "util",
+        "cli"
+    ],
+    "preferGlobal": true,
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    }
 }
