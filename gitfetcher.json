@@ -9,9 +9,11 @@
     },
     "smuxi": {
         "path": "~/Code/CSharp/smuxi",
-        "pull": false
+        "pull": false,
+        "context": "cs"
     },
     "bootstrap": {
-        "path": "~/Code/CSS/bootstrap"
+        "path": "~/Code/CSS/bootstrap",
+        "context": ["css", "less", "js"]
     }
 }
