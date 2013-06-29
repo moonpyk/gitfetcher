@@ -1,1 +1,1 @@
-require('./lib/gitfetcher').main();
+require('./lib/gitfetcher').main(process.argv);
