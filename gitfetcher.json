@@ -1,14 +1,17 @@
 {
     "defaults": {
         "git_bin": "/opt/local/bin/git",
+        "_git_bin_on_windows": "C:/Program Files (x86)/Git/cmd/git.exe",
+        "pull": true,
+        "fetch_all": true,
+        "pull_ff_only": true,
         "print_git_out": true
     },
-    "Qt 4.6": {
-        "path": "qt",
-        "pull": true
+    "smuxi": {
+        "path": "~/Code/CSharp/smuxi",
+        "pull": false
     },
-    "Qt 4.7": {
-        "path": "qt47",
-        "pull": true
+    "bootstrap": {
+        "path": "~/Code/CSS/bootstrap"
     }
 }
