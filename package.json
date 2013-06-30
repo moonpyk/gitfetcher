@@ -1,6 +1,6 @@
 {
   "name": "gitfetcher",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A pretty cool utility to fetch/pull from multiple git repositories configured as projects.",
   "main": "index.js",
   "repository": {
