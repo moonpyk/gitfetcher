@@ -1,4 +1,4 @@
-# GitFetcher #
+# GitFetcher [![Build Status](https://travis-ci.org/moonpyk/gitfetcher.png)](https://travis-ci.org/moonpyk/gitfetcher)
 
 A pretty cool utility to fetch/pull from multiple git repositories configured as projects.
 
@@ -26,3 +26,5 @@ Configuration is a JSON format file.
 An example configuration is available inside the project directory.
 
 On *nix, git is usually available at `/usr/bin/git` location, on Windows `C:\Program Files\Git\cmd\git.exe` or `C:\Program Files (x86)\Git\cmd\git.exe` on 64bits versions.
+
+A pretty cool utility to fetch/pull from multiple git repositories configured as projects.
