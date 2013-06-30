@@ -25,12 +25,11 @@ var u = require('../lib/util');
 exports.util = {
     setUp: function (done) {
         // setup here
+        process.env.HOME = "/home/foobar";
+        process.env.USERPROFILE = "C:\\Users\\foobar";
         done();
     },
     expandEnv: function (test) {
-        process.env.HOME = "/home/foobar";
-        process.env.USERPROFILE = "C:\\Users\\foobar";
-
         if (process.platform == "win32") {
             test.equal(u.expandEnv("~"), process.env.USERPROFILE);
             test.equal(u.expandEnv("${USERPROFILE}"), process.env.USERPROFILE);
@@ -43,6 +42,21 @@ exports.util = {
         test.equals(u.expandEnv("${}"), "");
         test.equals(u.expandEnv("${FOOBAR}/${ZGRUNT}"), "/");
         test.equals(u.expandEnv("${ANOTHER_VAR}\\${ZGRUNT}"), "\\");
+
+        test.done();
+    },
+    resolveExpandEnv: function (test) {
+        if (process.platform == "win32") {
+            test.equals(
+                u.resolveExpandEnv("~/test/dir"),
+                "C:\\Users\\foobar\\test\\dir"
+            );
+        } else {
+            test.equals(
+                u.resolveExpandEnv("~/test/dir"),
+                "/home/foobar/test/dir"
+            );
+        }
 
         test.done();
     }
