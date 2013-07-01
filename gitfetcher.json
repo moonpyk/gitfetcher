@@ -1,7 +1,8 @@
 {
     "defaults": {
         "git_bin": "/opt/local/bin/git",
-        "_git_bin_on_windows": "C:/Program Files (x86)/Git/cmd/git.exe",
+        "_git_bin_on_windows": "C:/Program Files/Git/cmd/git.exe",
+        "_git_bin_on_windows_x64": "C:/Program Files (x86)/Git/cmd/git.exe",
         "pull": true,
         "fetch_all": true,
         "pull_ff_only": true,
@@ -14,6 +15,10 @@
     },
     "bootstrap": {
         "path": "~/Code/CSS/bootstrap",
-        "context": ["css", "less", "js"]
+        "context": [
+            "css",
+            "less",
+            "js"
+        ]
     }
 }
