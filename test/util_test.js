@@ -33,9 +33,12 @@ exports.util = {
         if (process.platform == "win32") {
             test.equal(u.expandEnv("~"), process.env.USERPROFILE);
             test.equal(u.expandEnv("${USERPROFILE}"), process.env.USERPROFILE);
+            test.equal(u.expandEnv("${USERPROFILE}|${USERPROFILE}"), process.env.USERPROFILE + "|" + process.env.USERPROFILE);
+
         } else {
             test.equal(u.expandEnv("~"), "/home/foobar");
             test.equal(u.expandEnv("${HOME}"), process.env.HOME);
+            test.equal(u.expandEnv("${HOME}|${HOME}"), process.env.HOME + "|" + process.env.HOME);
         }
 
         test.equals(u.expandEnv("${NON_EXISTANT}"), "");
