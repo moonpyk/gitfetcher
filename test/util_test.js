@@ -64,5 +64,35 @@ exports.util = {
         }
 
         test.done();
+    },
+    dotNotationToObject: function (test) {
+        test.equals(u.dotNotationToObject('', 8), 8);
+        test.equals(u.dotNotationToObject('....', 8), 8);
+        test.deepEqual(u.dotNotationToObject('plop....', 8), {plop: 8});
+        test.deepEqual(u.dotNotationToObject('plop.test.0.plop', 8), {plop: {test: {0: {plop: 8}}}});
+        test.deepEqual(u.dotNotationToObject('plop.test.plop', undefined), {plop: {test: {plop: undefined}}});
+
+        test.done();
+    },
+    inferString: function (test) {
+        test.equals(u.inferString("8"), 8);
+        test.equals(u.inferString("8.8"), 8.8);
+        test.equals(u.inferString("865464.887"), 865464.887);
+
+        test.equals(u.inferString("value"), "value");
+
+        test.equals(u.inferString("true"), true);
+        test.equals(u.inferString("yes"), true);
+
+        test.equals(u.inferString("false"), false);
+        test.equals(u.inferString("no"), false);
+
+        test.equals(u.inferString("null"), null);
+        test.equals(u.inferString("undefined"), undefined);
+
+        test.deepEqual(u.inferString({}), {});
+        test.deepEqual(u.inferString([]), []);
+
+        test.done();
     }
 };
