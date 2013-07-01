@@ -30,15 +30,17 @@ exports.util = {
         done();
     },
     expandEnv: function (test) {
+        var ev = process.env;
+
         if (process.platform == "win32") {
-            test.equal(u.expandEnv("~"), process.env.USERPROFILE);
-            test.equal(u.expandEnv("${USERPROFILE}"), process.env.USERPROFILE);
-            test.equal(u.expandEnv("${USERPROFILE}|${USERPROFILE}"), process.env.USERPROFILE + "|" + process.env.USERPROFILE);
+            test.equal(u.expandEnv("~"), ev.USERPROFILE);
+            test.equal(u.expandEnv("${USERPROFILE}"), ev.USERPROFILE);
+            test.equal(u.expandEnv("${USERPROFILE}|${USERPROFILE}"), ev.USERPROFILE + "|" + ev.USERPROFILE);
 
         } else {
             test.equal(u.expandEnv("~"), "/home/foobar");
-            test.equal(u.expandEnv("${HOME}"), process.env.HOME);
-            test.equal(u.expandEnv("${HOME}|${HOME}"), process.env.HOME + "|" + process.env.HOME);
+            test.equal(u.expandEnv("${HOME}"), ev.HOME);
+            test.equal(u.expandEnv("${HOME}|${HOME}"), ev.HOME + "|" + ev.HOME);
         }
 
         test.equals(u.expandEnv("${NON_EXISTANT}"), "");
