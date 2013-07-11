@@ -1,4 +1,4 @@
-# GitFetcher [![Build Status](https://travis-ci.org/moonpyk/gitfetcher.png)](https://travis-ci.org/moonpyk/gitfetcher)
+# GitFetcher [![Build Status](https://travis-ci.org/moonpyk/gitfetcher.png)](https://travis-ci.org/moonpyk/gitfetcher) [![Dependency Status](https://gemnasium.com/moonpyk/gitfetcher.png)](https://gemnasium.com/moonpyk/gitfetcher)
 
 A pretty cool utility to fetch/pull from multiple git repositories configured as projects.
 
