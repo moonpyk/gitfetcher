@@ -7,6 +7,8 @@
 *.seed
 *.sublime-workspace
 *.suo
+*.map
+lib/*.js
 .DS_Store
 .idea
 .project
