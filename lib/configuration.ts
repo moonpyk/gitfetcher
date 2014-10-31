@@ -8,21 +8,26 @@
 
 ///<reference path="../typings/tsd.d.ts"/>
 
+"use strict";
+
 import fs = require('fs');
 import u = require('./util');
 import nu = require('util');
+import _ = require('lodash');
 var o = require('./output');
 
 class Configuration {
     private _raw:string;
     private _projectFilled:boolean;
-    static filename:string;
+
+    filename:string;
     content:any;
     projects:any;
 
     constructor() {
         this._raw = "";
         this._projectFilled = false;
+        this.filename ='';
         this.content = {};
         this.projects = {};
     }
@@ -54,15 +59,13 @@ class Configuration {
     static open(filename:string) {
         var c = new Configuration();
 
-        var ret = c._open(filename);
-
-        if (ret === false) {
+        if (c._open(filename) === false) {
             return null;
         }
 
-        Configuration.filename = filename;
+        c.filename = filename;
 
-        return ret;
+        return c;
     }
 
     fillProjects() {
@@ -82,7 +85,7 @@ class Configuration {
                     this.projects[key].path
                 );
             }
-        });
+        }, this);
 
         this._projectFilled = true;
 
@@ -91,7 +94,7 @@ class Configuration {
 
     save(filename) {
         if (!_.isString(filename)) {
-            filename = Configuration.filename;
+            filename = this.filename;
         }
 
         var jsConfig = JSON.stringify(this.content, null, o.indent(4));
@@ -110,12 +113,13 @@ class Configuration {
     static getDefaults () {
         return _.clone(Configuration.defaults);
     }
+
     private static _makeProject (proj) {
         return _.extend(Configuration.getDefaults(), proj);
     }
 
     private _open(filename):any {
-        if (_.isString(filename)) {
+        if (!_.isString(filename)) {
             return false;
         }
 
@@ -146,3 +150,5 @@ class Configuration {
         return filename;
     }
 }
+
+export = Configuration;

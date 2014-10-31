@@ -7,6 +7,9 @@
  */
 
 ///<reference path="../typings/tsd.d.ts"/>
+
+"use strict";
+
 import path = require('path');
 import _ = require('lodash');
 
@@ -108,4 +111,3 @@ export function prompt(cb:Function) {
 
     return stdin.resume();
 }
-
