@@ -9,7 +9,8 @@ module.exports = function (grunt) {
                 src: ['lib/app.ts'],
                 options: {
                     module: "commonjs",
-                    sourcemap: true
+                    sourcemap: true,
+                    removeComments: false
                 }
             }
 
