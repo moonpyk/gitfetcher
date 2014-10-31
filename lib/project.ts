@@ -2,7 +2,7 @@
  * gitfetcher
  * https://github.com/moonpyk/gitfetcher
  *
- * Copyright (c) 2013 Clément Bourgeois
+ * Copyright (c) 2013 Cléthisnt Bourgeois
  * Licensed under the MIT license.
  */
 
@@ -15,12 +15,12 @@ import fs = require('fs');
 import path = require('path');
 import _ = require("lodash");
 import u = require('./util');
-import nu = require('util');
+import util = require('util');
 import Configuration = require('./configuration');
 import o = require("./output");
 
 class Project {
-    configuration:Configuration;
+    configuration:any;
     contextList:string[];
 
     constructor(c) {
@@ -32,10 +32,10 @@ class Project {
         }
     }
 
-    private _asyncCallback(code, fn) {
+    private static asyncCallback(code, fn) {
         if (_.isFunction(fn)) {
             fn(
-                code !== 0 ? {} : null,
+                code !== 0 ? new Error() : null,
                 {code: 0}
             );
         }
@@ -86,12 +86,11 @@ class Project {
         return fs.existsSync(path.join(c['rpath'], ".git"));
     }
 
-    fetch(callback) {
+    fetch(callback:AsyncMultipleResultsCallback<any>) {
         o.info("Fetching...", o.indent(4));
 
-        var me = this,
-            args = ['fetch'],
-            c = me.configuration;
+        var args = ['fetch'],
+            c = this.configuration;
 
         if (_.isBoolean(c['fetch_all']) && c['fetch_all']) {
             args.push('--all');
@@ -101,43 +100,43 @@ class Project {
             args.push('--tags');
         }
 
-        me.cmd(args).on('exit', function (code) {
+        this.cmd(args).on('exit', (code) => {
             if (code === 0) {
                 o.ok("Done.", o.indent(5));
             } else {
-                o.error(nu.format("Error during fetch (%d).", code), o.indent(5));
+                o.error(util.format("Error during fetch (%d).", code), o.indent(5));
             }
 
-            me._asyncCallback(code, callback);
+            Project.asyncCallback(code, callback);
         });
     }
-    pull(callback) {
+
+    pull(callback:AsyncMultipleResultsCallback<any>) {
         o.info("Pulling...", o.indent(4));
 
-        var me = this,
-            args = ['pull'],
-            c = me.configuration;
+        var args = ['pull'],
+            c = this.configuration;
 
         if (_.isBoolean(c['pull_ff_only']) && c['pull_ff_only']) {
             args.push('--ff-only');
         }
 
-        me.cmd(args).on('exit', function (code) {
+        this.cmd(args).on('exit', (code) => {
             if (code === 0) {
                 o.ok("Done.", o.indent(5));
             } else {
-                o.error(nu.format("Error during pull (%d).", code), o.indent(5));
+                o.error(util.format("Error during pull (%d).", code), o.indent(5));
             }
 
-            me._asyncCallback(code, callback);
+            Project.asyncCallback(code, callback);
         });
     }
-    force_gc(callback) {
+
+    force_gc(callback:AsyncSingleResultCallback<any>) {
         o.info("Force GC...", o.indent(4));
 
-        var me = this,
-            args = ['gc'],
-            c = me.configuration;
+        var args = ['gc'],
+            c = this.configuration;
 
         if (_.isBoolean(c['force_gc_aggressive']) && c['force_gc_aggressive']) {
             args.push('--aggressive');
@@ -147,14 +146,16 @@ class Project {
             args.push('--prune=' + c['force_gc_prune']);
         }
 
-        me.cmd(args).on('exit', function (code) {
+        this.cmd(args).on('exit', (code) => {
             if (code === 0) {
                 o.ok("Done.", o.indent(5));
             } else {
-                o.error(nu.format("Error during force GC (%d).", code), o.indent(5));
+                o.error(
+                    util.format("Error during force GC (%d).", code), o.indent(5)
+                );
             }
 
-            me._asyncCallback(code, callback);
+            Project.asyncCallback(code, callback);
         });
     }
 }

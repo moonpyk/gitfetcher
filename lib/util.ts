@@ -101,8 +101,10 @@ export function expandEnv(val:any) {
 
     return val;
 }
+
 export function prompt(cb:Function) {
     var stdin = process.stdin;
+
     stdin.on('data', function (data) {
         if (_.isFunction(cb)) {
             cb(data);

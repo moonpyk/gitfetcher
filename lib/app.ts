@@ -16,10 +16,9 @@ import fs = require('fs');
 import _ = require('lodash');
 import async = require('async');
 import program = require('commander');
+import util = require('util');
 
 import u = require('./util');
-
-import nu = require('util');
 import o = require('./output');
 import Configuration = require('./configuration');
 import Project = require("./project");
@@ -82,7 +81,7 @@ export function main(argv) {
     }
 
     // Trying each possible path until found a valid configuration
-    _(confLookup).each(function (f) {
+    _(confLookup).each((f) => {
         if (c !== null) {
             return;
         }
@@ -93,14 +92,14 @@ export function main(argv) {
 
         if (parsed !== null) {
             c = parsed;
-            o.info(nu.format("Using configuration file '%s'...", f));
+            o.info(util.format("Using configuration file '%s'...", f));
         }
     });
 
     // Definitely no valid config has been found
     if (c === null) {
         if (confLookup.length == 1) {
-            o.error(nu.format("Unable to read config file '%s'.", confLookup[0]));
+            o.error(util.format("Unable to read config file '%s'.", confLookup[0]));
         } else {
             o.error("No config file found, aborting.");
         }
@@ -143,11 +142,11 @@ export function main(argv) {
     if (program['listProjects']) {
         c.fillProjects();
         console.log("Available projects :");
-        _(c.projects).each(function (p, key) {
-            console.log(nu.format(
+        _(c.projects).each((p, key) => {
+            console.log(util.format(
                 " - %s (%s)",
                 key,
-                nu.inspect(c.content[key], false, undefined, true)
+                util.inspect(c.content[key], false, undefined, true)
             ));
         });
         return;
@@ -181,7 +180,7 @@ export function main(argv) {
 
         if (!p.check()) {
             o.warning(
-                nu.format("Project '%s' is now invalid, please check your configuration.", key),
+                util.format("Project '%s' is now invalid, please check your configuration.", key),
                 o.indent(2)
             );
             return;
@@ -192,10 +191,12 @@ export function main(argv) {
         }
 
         // Project is enabled, populating the project tasks...
-        projectsTasks[key] = function (callback) {
+        projectsTasks[key] = function (callback:AsyncSingleResultCallback<any>) {
             var tasks = {};
 
-            o.info(nu.format("Project '%s'...", key), o.indent(2));
+            o.info(
+                util.format("Project '%s'...", key), o.indent(2)
+            );
 
             if (!pretend) {
                 tasks['fetch'] = p.fetch.bind(p);
@@ -210,7 +211,7 @@ export function main(argv) {
             }
 
             // When done with one project, continue to next
-            async.series(tasks, function (err, results) {
+            async.series(tasks, (err, results) => {
                 if (exit_on_fail && _.isObject(err)) {
                     process['fail']();
                     return;
@@ -242,17 +243,21 @@ function addProject(p, c) {
     }
 
     // Looking for a .git directory inside the working copy
-    fs.exists(path.join(projectDir, '.git'), function (exists) {
+    fs.exists(path.join(projectDir, '.git'), (exists) => {
         if (exists) {
             c.content[projectName] = _.extend(c.content[projectName] || {}, {
                 path: projectDir
             });
 
             if (c.save()) {
-                o.ok(nu.format("Project '%s' saved to configuration file '%s", projectName, c.filename));
+                o.ok(
+                    util.format("Project '%s' saved to configuration file '%s", projectName, c.filename)
+                );
             }
         } else {
-            o.error(nu.format("Directory '%s' doesn't appears to be a valid git project working copy", projectDir));
+            o.error(
+                util.format("Directory '%s' doesn't appears to be a valid git project working copy", projectDir)
+            );
         }
     });
 }
@@ -285,7 +290,7 @@ function setOption(path, c, value) {
         u.inferString(value)
     );
 
-    _.extend(c.content, parsed, function (a, b) {
+    _.extend(c.content, parsed, (a, b) => {
         if (_.isObject(a) && _.isObject(b)) {
             return _.extend(a, b);
         }
