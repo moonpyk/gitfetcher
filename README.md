@@ -7,7 +7,7 @@ Install the module with: `npm install -g gitfetcher`
 
 ## Requirements
 
- * NodeJS >= 0.8.0
+ * NodeJS >= 0.10.0
  * Git
 
 ## Configuration
