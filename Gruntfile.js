@@ -4,13 +4,13 @@ module.exports = function (grunt) {
 
     // Project configuration.
     grunt.initConfig({
-        ts: {
+        typescript: {
             build: {
                 src: ['lib/app.ts'],
                 options: {
                     module: "commonjs",
-                    sourcemap: true,
-                    removeComments: false
+                    sourceMap: true,
+                    comments: true
                 }
             }
 
@@ -53,9 +53,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-nodeunit');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-ts');
+    grunt.loadNpmTasks('grunt-typescript');
 
     // Default task.
-    grunt.registerTask('default', ['ts', 'jshint', 'nodeunit']);
+    grunt.registerTask('default', ['typescript', 'jshint', 'nodeunit']);
 
 };
