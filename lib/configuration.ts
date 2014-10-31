@@ -14,7 +14,7 @@ import fs = require('fs');
 import u = require('./util');
 import nu = require('util');
 import _ = require('lodash');
-var o = require('./output');
+import o = require('./output');
 
 class Configuration {
     private _raw:string;

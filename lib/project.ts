@@ -17,8 +17,7 @@ import _ = require("lodash");
 import u = require('./util');
 import nu = require('util');
 import Configuration = require('./configuration');
-
-var o = require("./output.js");
+import o = require("./output");
 
 class Project {
     configuration:Configuration;
