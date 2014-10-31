@@ -27,7 +27,7 @@ class Configuration {
     constructor() {
         this._raw = "";
         this._projectFilled = false;
-        this.filename ='';
+        this.filename = '';
         this.content = {};
         this.projects = {};
     }
@@ -68,12 +68,16 @@ class Configuration {
         return c;
     }
 
+    get(key:string) : any {
+        return this[key];
+    }
+
     fillProjects() {
         if (this._projectFilled) {
             return this;
         }
 
-        _(this.content).each(function (v, key) {
+        _(this.content).each((v, key) => {
             if (key === "defaults") {
                 return;
             }
@@ -85,7 +89,7 @@ class Configuration {
                     this.projects[key].path
                 );
             }
-        }, this);
+        });
 
         this._projectFilled = true;
 
@@ -110,11 +114,11 @@ class Configuration {
         return true;
     }
 
-    static getDefaults () {
+    static getDefaults() {
         return _.clone(Configuration.defaults);
     }
 
-    private static _makeProject (proj) {
+    private static _makeProject(proj) {
         return _.extend(Configuration.getDefaults(), proj);
     }
 

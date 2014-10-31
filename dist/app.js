@@ -1,28 +1,17 @@
-/*
- * gitfetcher
- * https://github.com/moonpyk/gitfetcher
- *
- * Copyright (c) 2013 Clément Bourgeois
- * Licensed under the MIT license.
- */
-
-///<reference path="../typings/tsd.d.ts"/>
-
 "use strict";
+var path = require('path');
+var fs = require('fs');
 
-import path = require('path');
-import fs = require('fs');
+var _ = require('lodash');
+var async = require('async');
+var program = require('commander');
 
-import _ = require('lodash');
-import async = require('async');
-import program = require('commander');
+var u = require('./util');
 
-import u = require('./util');
-
-import nu = require('util');
-import o = require('./output');
-import Configuration = require('./configuration');
-import Project = require("./project");
+var nu = require('util');
+var o = require('./output');
+var Configuration = require('./configuration');
+var Project = require("./project");
 
 var confLookup = [
     '~/.gitfetcher.json',
@@ -30,10 +19,7 @@ var confLookup = [
     'gitfetcher.json'
 ];
 
-var pack = require("../package.json"),
-    exit_on_fail = false,
-    readline_on_fail = false,
-    readline_on_finish = false;
+var pack = require("../package.json"), exit_on_fail = false, readline_on_fail = false, readline_on_finish = false;
 
 process['colorEnabled'] = true;
 
@@ -53,21 +39,8 @@ process['fail'] = function (code) {
     process.exit(code);
 };
 
-export function main(argv) {
-    program
-        .version(pack.version)
-        .usage('[options] [project-name...]')
-        .option('--set-option <path> <value>', 'Set the configuration value of <path> to <value>')
-        .option('--unset-option <path>', "Remove the configuration value of <path>")
-        .option('-a, --add-project <dir>', 'Add the working copy directory <dir> to the registered projects')
-        .option('-c, --config  <config>', 'Force use of specific config file <config>')
-        .option('-e, --edit-config', 'Open the config file in a text editor')
-        .option('-l, --list-projects', 'List available projects in config')
-        .option('-N, --no-color', 'Disable output-coloring even if available')
-        .option('-p, --pretend', "Don't do anything, just pretend")
-        .option('-R, --reformat', 'Reformat the config file to have pretty JSON')
-        .option('-x, --context <context>', 'Run inside context <context>')
-        .parse(argv);
+function main(argv) {
+    program.version(pack.version).usage('[options] [project-name...]').option('--set-option <path> <value>', 'Set the configuration value of <path> to <value>').option('--unset-option <path>', "Remove the configuration value of <path>").option('-a, --add-project <dir>', 'Add the working copy directory <dir> to the registered projects').option('-c, --config  <config>', 'Force use of specific config file <config>').option('-e, --edit-config', 'Open the config file in a text editor').option('-l, --list-projects', 'List available projects in config').option('-N, --no-color', 'Disable output-coloring even if available').option('-p, --pretend', "Don't do anything, just pretend").option('-R, --reformat', 'Reformat the config file to have pretty JSON').option('-x, --context <context>', 'Run inside context <context>').parse(argv);
 
     if (program['color'] === false) {
         process['colorEnabled'] = false;
@@ -75,21 +48,16 @@ export function main(argv) {
 
     var c = null;
 
-    // If a specific configuration file has been given
-    // we reset the default lookups to use only that precise one.
     if (_.isString(program['config'])) {
         confLookup = [program['config']];
     }
 
-    // Trying each possible path until found a valid configuration
     _(confLookup).each(function (f) {
         if (c !== null) {
             return;
         }
 
-        var parsed = Configuration.open(
-            u.resolveExpandEnv(f)
-        );
+        var parsed = Configuration.open(u.resolveExpandEnv(f));
 
         if (parsed !== null) {
             c = parsed;
@@ -97,7 +65,6 @@ export function main(argv) {
         }
     });
 
-    // Definitely no valid config has been found
     if (c === null) {
         if (confLookup.length == 1) {
             o.error(nu.format("Unable to read config file '%s'.", confLookup[0]));
@@ -108,33 +75,26 @@ export function main(argv) {
         return;
     }
 
-    // User asked to add a new project to the active config.
     if (_.isString(program['addProject'])) {
         addProject(program, c);
         return;
     }
 
-    // Reformat nicely the configuration
     if (_.isBoolean(program['reformat']) && program['reformat']) {
         c.save();
         return;
     }
 
-    // Open the configuration inside a text editor
     if (_.isBoolean(program['editConfig']) && program['editConfig']) {
         editConfig(c);
         return;
     }
 
-    // Set an option with a given path
-    if (_.isString(program['setOption']) && !_.isEmpty(program['setOption']) &&
-        _.isString(program.args[0]) && !_.isEmpty(program.args[0])
-    ) {
+    if (_.isString(program['setOption']) && !_.isEmpty(program['setOption']) && _.isString(program.args[0]) && !_.isEmpty(program.args[0])) {
         setOption(program['setOption'], c, program.args[0]);
         return;
     }
 
-    // Unset an option with the given path
     if (_.isString(program['unsetOption']) && !_.isEmpty(program['unsetOption'])) {
         unsetOption(program, c);
         return;
@@ -144,11 +104,7 @@ export function main(argv) {
         c.fillProjects();
         console.log("Available projects :");
         _(c.projects).each(function (p, key) {
-            console.log(nu.format(
-                " - %s (%s)",
-                key,
-                nu.inspect(c.content[key], false, undefined, true)
-            ));
+            console.log(nu.format(" - %s (%s)", key, nu.inspect(c.content[key], false, undefined, true)));
         });
         return;
     }
@@ -157,18 +113,11 @@ export function main(argv) {
     readline_on_fail = Configuration.defaults.readline_on_fail;
     readline_on_finish = Configuration.defaults.readline_on_finish;
 
-    // Valid config found, filling the projects configurations.
     c.fillProjects();
 
-    var context = _.isString(program['context']) && !_.isEmpty(program['context']) ? program['context'] : null,
-        pretend = _.isBoolean(program['pretend']) && program['pretend'],
-        projectsTasks = {},
-        projectMode = _.isArray(program.args) && program.args.length > 0;
+    var context = _.isString(program['context']) && !_.isEmpty(program['context']) ? program['context'] : null, pretend = _.isBoolean(program['pretend']) && program['pretend'], projectsTasks = {}, projectMode = _.isArray(program.args) && program.args.length > 0;
 
-    // For each projects, we create of list of tasks, depending
-    // on each project configuration. Each project is a task of tasks.
-
-    _(c.projects).each((conf, key) => {
+    _(c.projects).each(function (conf, key) {
         if (projectMode && !_.contains(program.args, key)) {
             return;
         }
@@ -180,10 +129,7 @@ export function main(argv) {
         var p = new Project(conf);
 
         if (!p.check()) {
-            o.warning(
-                nu.format("Project '%s' is now invalid, please check your configuration.", key),
-                o.indent(2)
-            );
+            o.warning(nu.format("Project '%s' is now invalid, please check your configuration.", key), o.indent(2));
             return;
         }
 
@@ -191,7 +137,6 @@ export function main(argv) {
             return;
         }
 
-        // Project is enabled, populating the project tasks...
         projectsTasks[key] = function (callback) {
             var tasks = {};
 
@@ -209,7 +154,6 @@ export function main(argv) {
                 }
             }
 
-            // When done with one project, continue to next
             async.series(tasks, function (err, results) {
                 if (exit_on_fail && _.isObject(err)) {
                     process['fail']();
@@ -220,7 +164,6 @@ export function main(argv) {
         };
     });
 
-    // Running all projects, in series
     async.series(projectsTasks);
 
     if (readline_on_finish) {
@@ -231,17 +174,16 @@ export function main(argv) {
         });
     }
 }
+exports.main = main;
 
 function addProject(p, c) {
-    var projectDir = u.resolveExpandEnv(p.addProject),
-        projectName = path.basename(projectDir);
+    var projectDir = u.resolveExpandEnv(p.addProject), projectName = path.basename(projectDir);
 
     if (projectName === "defaults") {
         o.error("Project name 'defaults' is not valid");
         return;
     }
 
-    // Looking for a .git directory inside the working copy
     fs.exists(path.join(projectDir, '.git'), function (exists) {
         if (exists) {
             c.content[projectName] = _.extend(c.content[projectName] || {}, {
@@ -258,8 +200,7 @@ function addProject(p, c) {
 }
 
 function editConfig(c) {
-    var s = require('child_process'),
-        editor = "";
+    var s = require('child_process'), editor = "";
 
     if (_.isString(process.env.EDITOR)) {
         editor = process.env.EDITOR;
@@ -280,10 +221,7 @@ function editConfig(c) {
 }
 
 function setOption(path, c, value) {
-    var parsed = u.dotNotationToObject(
-        path,
-        u.inferString(value)
-    );
+    var parsed = u.dotNotationToObject(path, u.inferString(value));
 
     _.extend(c.content, parsed, function (a, b) {
         if (_.isObject(a) && _.isObject(b)) {
@@ -297,3 +235,4 @@ function setOption(path, c, value) {
 function unsetOption(program, c) {
     setOption(program.unsetOption, c, undefined);
 }
+//# sourceMappingURL=app.js.map

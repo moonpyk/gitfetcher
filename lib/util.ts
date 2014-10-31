@@ -74,7 +74,7 @@ export function dotNotationToObject(path:string, value:any) {
 
 export function resolveExpandEnv(f:string) {
     return path.resolve(
-        path.normalize(this.expandEnv(f))
+        path.normalize(expandEnv(f))
     );
 }
 

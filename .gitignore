@@ -8,7 +8,7 @@
 *.sublime-workspace
 *.suo
 *.map
-lib/*.js
+.tscache
 .DS_Store
 .idea
 .project
