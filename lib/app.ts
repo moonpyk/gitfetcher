@@ -145,13 +145,12 @@ export function main(argv) {
 
     var context = _.isString(program['context']) && !_.isEmpty(program['context']) ? program['context'] : null,
         pretend = _.isBoolean(program['pretend']) && program['pretend'],
-        projectsTasks = {},
         projectMode = _.isArray(program.args) && program.args.length > 0;
 
     // For each projects, we create of list of tasks, depending
     // on each project configuration. Each project is a task of tasks.
 
-    _(c.projects).each((conf, key) => {
+    var projectsTasks = _(c.projects).map((conf, key) => {
         if (projectMode && !_.contains(program.args, key)) {
             return;
         }
@@ -175,7 +174,7 @@ export function main(argv) {
         }
 
         // Project is enabled, populating the project tasks...
-        projectsTasks[key] = function (callback:AsyncSingleResultCallback<any>) {
+        return function (callback:AsyncSingleResultCallback<any>) {
             var tasks = {};
 
             o.info(
@@ -203,18 +202,19 @@ export function main(argv) {
                 callback(null, results);
             });
         };
-    });
+    }).value();
 
     // Running all projects, in series
-    async.series(projectsTasks);
-
-    if (readline_on_finish) {
+    async.series(projectsTasks, (err:Error, results:any[]):any => {
+        if (!readline_on_finish) {
+            return;
+        }
         console.log("Press any key to finish...");
 
         u.prompt(function () {
             process.exit(0);
         });
-    }
+    });
 }
 
 function addProject(p, c) {
