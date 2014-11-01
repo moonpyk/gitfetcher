@@ -36,22 +36,6 @@ var pack = require("../package.json"),
 
 process['colorEnabled'] = true;
 
-process['fail'] = function (code) {
-    if (!_.isNumber(code)) {
-        code = 1;
-    }
-
-    if (readline_on_fail) {
-        console.log("Error encountered, press any key to finish...");
-        u.prompt(function () {
-            process.exit(code);
-        });
-        return;
-    }
-
-    process.exit(code);
-};
-
 export function main(argv) {
     program
         .version(pack.version)
@@ -103,7 +87,7 @@ export function main(argv) {
         } else {
             o.error("No config file found, aborting.");
         }
-        process['fail'](78);
+        fail(78);
         return;
     }
 
@@ -213,7 +197,7 @@ export function main(argv) {
             // When done with one project, continue to next
             async.series(tasks, (err, results) => {
                 if (exit_on_fail && _.isObject(err)) {
-                    process['fail']();
+                    fail();
                     return;
                 }
                 callback(null, results);
@@ -301,4 +285,20 @@ function setOption(path, c, value) {
 
 function unsetOption(program, c) {
     setOption(program.unsetOption, c, undefined);
+}
+
+function fail(code?) {
+    if (!_.isNumber(code)) {
+        code = 1;
+    }
+
+    if (readline_on_fail) {
+        console.log("Error encountered, press any key to finish...");
+        u.prompt(function () {
+            process.exit(code);
+        });
+        return;
+    }
+
+    process.exit(code);
 }

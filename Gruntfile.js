@@ -56,6 +56,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-typescript');
 
     // Default task.
-    grunt.registerTask('default', ['typescript', 'jshint', 'nodeunit']);
+    grunt.registerTask('default', ['jshint', 'nodeunit']);
 
 };
