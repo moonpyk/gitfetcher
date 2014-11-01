@@ -149,7 +149,6 @@ export function main(argv) {
 
     // For each projects, we create of list of tasks, depending
     // on each project configuration. Each project is a task of tasks.
-
     var projectsTasks = _(c.projects).map((conf, key) => {
         if (projectMode && !_.contains(program.args, key)) {
             return;
@@ -205,7 +204,7 @@ export function main(argv) {
     }).value();
 
     // Running all projects, in series
-    async.series(projectsTasks, (err:Error, results:any[]):any => {
+    async.series(projectsTasks, () => {
         if (!readline_on_finish) {
             return;
         }
