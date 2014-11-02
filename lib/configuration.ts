@@ -16,6 +16,7 @@ import nu = require('util');
 import _ = require('lodash');
 import o = require('./output');
 import path = require('path');
+import os = require('os');
 
 class Configuration {
     private _raw:string;
@@ -28,7 +29,6 @@ class Configuration {
     content:any;
     statContent:any;
     projects:any;
-    stats:any;
 
     constructor() {
         this._raw = "";
@@ -129,7 +129,6 @@ class Configuration {
         var jsConfig = JSON.stringify(this.content, null, o.indent(4));
 
         try {
-            var os = require('os');
             fs.writeFile(filename, jsConfig.replace(/\n/g, os.EOL) + os.EOL, {
                 encoding: 'utf8'
             });
@@ -146,18 +145,15 @@ class Configuration {
         if (!_.isString(filename)) {
             filename = this.statFilename;
         }
-        console.log(this.statContent);
 
         var jsStat = JSON.stringify(this.statContent);
 
         try {
-            var os = require('os');
             fs.writeFile(filename, jsStat.replace(/\n/g, os.EOL) + os.EOL, {
                 encoding: 'utf8'
             });
 
         } catch (ex) {
-            console.log(ex);
             o.warning(nu.format("Unable to save stat to '%s'", filename));
             return false;
         }
