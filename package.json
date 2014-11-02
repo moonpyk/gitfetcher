@@ -45,6 +45,6 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt jshint nodeunit"
+    "test": "grunt typescript jshint nodeunit"
   }
 }
