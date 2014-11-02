@@ -19,3 +19,5 @@ node_modules/
 npm-debug.log
 pids
 results
+lib/*.js
+test/*.js
