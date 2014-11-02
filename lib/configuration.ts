@@ -118,7 +118,7 @@ class Configuration {
 
         this._projectFilled = true;
 
-        return this;
+        return this.projects;
     }
 
     save(filename?):boolean {

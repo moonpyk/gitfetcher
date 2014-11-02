@@ -1,1 +1,1 @@
-require('./lib/app').main(process.argv);
+new (require('./lib/app'))().main(process.argv);
