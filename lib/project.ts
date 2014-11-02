@@ -22,10 +22,12 @@ import o = require("./output");
 class Project {
     configuration:any;
     contextList:string[];
+    key:string;
 
-    constructor(c) {
+    constructor(c, key:string) {
         this.configuration = c;
         this.contextList = [];
+        this.key = key;
 
         if (_.isString(c.context)) {
             this.contextList.push(c.context);
@@ -84,6 +86,14 @@ class Project {
         }
 
         return fs.existsSync(path.join(c['rpath'], ".git"));
+    }
+
+    printName(callback:AsyncMultipleResultsCallback<any>) {
+        o.info(
+            util.format("Project '%s'...", this.key), o.indent(2)
+        );
+
+        callback(null, null);
     }
 
     fetch(callback:AsyncMultipleResultsCallback<any>) {

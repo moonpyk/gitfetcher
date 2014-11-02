@@ -68,10 +68,6 @@ class Configuration {
         return c;
     }
 
-    get(key:string) : any {
-        return this[key];
-    }
-
     fillProjects() {
         if (this._projectFilled) {
             return this;

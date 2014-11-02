@@ -158,7 +158,7 @@ export function main(argv) {
             return;
         }
 
-        var p = new Project(conf);
+        var p = new Project(conf, key);
 
         if (!p.check()) {
             o.warning(
@@ -174,31 +174,29 @@ export function main(argv) {
 
         // Project is enabled, populating the project tasks...
         return function (callback:AsyncSingleResultCallback<any>) {
-            var tasks = {};
+            var tasks = [];
 
-            o.info(
-                util.format("Project '%s'...", key), o.indent(2)
-            );
+            tasks.push(p.printName.bind(p));
 
             if (!pretend) {
-                tasks['fetch'] = p.fetch.bind(p);
+                tasks.push(p.fetch.bind(p));
 
                 if (conf['pull']) {
-                    tasks['push'] = p.pull.bind(p);
+                    tasks.push(p.pull.bind(p));
                 }
 
                 if (conf['force_gc']) {
-                    tasks['force_gc'] = p.force_gc.bind(p);
+                    tasks.push(p.force_gc.bind(p));
                 }
             }
 
             // When done with one project, continue to next
-            async.series(tasks, (err, results) => {
+            async.series(tasks, (err, res) => {
                 if (exit_on_fail && _.isObject(err)) {
                     fail();
                     return;
                 }
-                callback(null, results);
+                callback(null, res);
             });
         };
     }).value();
