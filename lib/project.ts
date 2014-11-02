@@ -31,6 +31,9 @@ class Project {
 
         if (_.isString(c.context)) {
             this.contextList.push(c.context);
+
+        } else if (_.isArray(c.context)) {
+            this.contextList = c.context;
         }
     }
 

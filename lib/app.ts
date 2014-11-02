@@ -157,7 +157,7 @@ class App {
         // on each project configuration. Each project is a task of tasks.
         var projectsTasks = _(conf.projects()).map((pConf, pKey) => {
             return this.handleProject(pKey, pConf, projectMode, context, pretend);
-        }).value();
+        }).filter(p => _.isFunction(p)).value();
 
         // Running all projects, in series
         async.series(projectsTasks, () => {
@@ -213,7 +213,7 @@ class App {
                 if (pConf['force_gc']) {
                     tasks['force_gc'] = p.force_gc.bind(p);
                 } else {
-                    if(this.configuration.fetchGet(pKey) % pConf['gc_interval'] === 0) {
+                    if (this.configuration.fetchGet(pKey) % pConf['gc_interval'] === 0) {
                         tasks['gc'] = p.gc.bind(p);
                     }
                 }
