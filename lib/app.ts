@@ -213,7 +213,7 @@ class App {
                 if (pConf['force_gc']) {
                     tasks['force_gc'] = p.force_gc.bind(p);
                 } else {
-                    if(this.configuration.fetchGet(pKey) % pConf['gc_interval'] == 0) {
+                    if(this.configuration.fetchGet(pKey) % pConf['gc_interval'] === 0) {
                         tasks['gc'] = p.gc.bind(p);
                     }
                 }
@@ -226,7 +226,7 @@ class App {
                     return;
                 }
 
-                if (_.isObject(res['fetch']) && res['fetch']['code'] == 0) {
+                if (_.isObject(res['fetch']) && res['fetch']['code'] === 0) {
                     this.configuration.fetchIncrement(pKey);
                 }
                 callback(null, res);
