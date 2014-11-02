@@ -134,7 +134,7 @@ class App {
         if (program['listProjects']) {
             console.log("Available projects :");
 
-            _(conf.fillProjects()).each((p, key) => {
+            _(conf.projects()).each((p, key) => {
                 console.log(util.format(
                     " - %s (%s)",
                     key,
@@ -155,7 +155,7 @@ class App {
 
         // For each projects, we create of list of tasks, depending
         // on each project configuration. Each project is a task of tasks.
-        var projectsTasks = _(conf.fillProjects()).map((pConf, pKey) => {
+        var projectsTasks = _(conf.projects()).map((pConf, pKey) => {
             return this.handleProject(pKey, pConf, projectMode, context, pretend);
         }).value();
 

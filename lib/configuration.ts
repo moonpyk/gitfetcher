@@ -28,15 +28,15 @@ class Configuration {
     statFilename:string;
     content:any;
     statContent:any;
-    projects: { [id: string] : any; };
+    private _projects: { [id: string] : any; };
 
     constructor() {
         this._raw = "";
         this._projectsFilled = false;
+        this._projects = {};
         this.filename = '';
         this.statFilename = '';
         this.content = {};
-        this.projects = {};
         this.statContent = {};
     }
 
@@ -97,28 +97,28 @@ class Configuration {
         return true;
     }
 
-    fillProjects() {
+    projects() {
         if (this._projectsFilled) {
-            return this.projects;
+            return this._projects;
         }
 
-        this.content.forEach((v, key) => {
+        _.each(this.content, (v, key) => {
             if (key === "defaults") {
                 return;
             }
 
-            this.projects[key] = Configuration._makeProject(this.content[key]);
+            this._projects[key] = Configuration._makeProject(this.content[key]);
 
-            if (_.isString(this.projects[key].path)) {
-                this.projects[key].rpath = u.resolveExpandEnv(
-                    this.projects[key].path
+            if (_.isString(this._projects[key].path)) {
+                this._projects[key].rpath = u.resolveExpandEnv(
+                    this._projects[key].path
                 );
             }
         });
 
         this._projectsFilled = true;
 
-        return this.projects;
+        return this._projects;
     }
 
     save(filename?):boolean {
