@@ -63,7 +63,7 @@ class App {
             process['colorEnabled'] = false;
         }
 
-        var c = this.configuration = null;
+        var conf = this.configuration = null;
 
         // If a specific configuration file has been given
         // we reset the default lookups to use only that precise one.
@@ -73,7 +73,7 @@ class App {
 
         // Trying each possible path until found a valid configuration
         _(confLookup).each((f) => {
-            if (c !== null) {
+            if (conf !== null) {
                 return;
             }
 
@@ -82,13 +82,13 @@ class App {
             );
 
             if (parsed !== null) {
-                c = parsed;
+                conf = parsed;
                 o.info(util.format("Using configuration file '%s'...", f));
             }
         });
 
         // Definitely no valid config has been found
-        if (c === null) {
+        if (conf === null) {
             if (confLookup.length == 1) {
                 o.error(util.format("Unable to read config file '%s'.", confLookup[0]));
             } else {
@@ -106,7 +106,7 @@ class App {
 
         // Reformat nicely the configuration
         if (_.isBoolean(program['reformat']) && program['reformat']) {
-            c.save();
+            conf.save();
             return;
         }
 
@@ -133,11 +133,11 @@ class App {
         if (program['listProjects']) {
             console.log("Available projects :");
 
-            _(c.fillProjects()).each((p, key) => {
+            _(conf.fillProjects()).each((p, key) => {
                 console.log(util.format(
                     " - %s (%s)",
                     key,
-                    util.inspect(c.content[key], false, undefined, true)
+                    util.inspect(conf.content[key], false, undefined, true)
                 ));
             });
             return;
@@ -154,13 +154,13 @@ class App {
 
         // For each projects, we create of list of tasks, depending
         // on each project configuration. Each project is a task of tasks.
-        var projectsTasks = _(c.fillProjects()).map((conf, key) => {
-            return this.handleProject(key, conf, projectMode, context, pretend);
+        var projectsTasks = _(conf.fillProjects()).map((pConf, pKey) => {
+            return this.handleProject(pKey, pConf, projectMode, context, pretend);
         }).value();
 
         // Running all projects, in series
         async.series(projectsTasks, () => {
-            c.saveStat();
+            conf.saveStat();
 
             if (!readline_on_finish) {
                 return;
@@ -173,20 +173,20 @@ class App {
         });
     }
 
-    handleProject(key:string, conf:any, projectMode:boolean, context:string, pretend:boolean) {
-        if (projectMode && !_.contains(this.program.args, key)) {
+    handleProject(pKey:string, pConf:any, projectMode:boolean, context:string, pretend:boolean) {
+        if (projectMode && !_.contains(this.program.args, pKey)) {
             return;
         }
 
-        if (!conf['enabled']) {
+        if (!pConf['enabled']) {
             return;
         }
 
-        var p = new Project(conf, key);
+        var p = new Project(pConf, pKey);
 
         if (!p.check()) {
             o.warning(
-                util.format("Project '%s' is now invalid, please check your configuration.", key),
+                util.format("Project '%s' is now invalid, please check your configuration.", pKey),
                 o.indent(2)
             );
             return;
@@ -205,11 +205,11 @@ class App {
             if (!pretend) {
                 tasks.push(p.fetch.bind(p));
 
-                if (conf['pull']) {
+                if (pConf['pull']) {
                     tasks.push(p.pull.bind(p));
                 }
 
-                if (conf['force_gc']) {
+                if (pConf['force_gc']) {
                     tasks.push(p.force_gc.bind(p));
                 }
             }
