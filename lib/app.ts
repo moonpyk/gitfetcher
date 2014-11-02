@@ -203,6 +203,8 @@ export function main(argv) {
 
     // Running all projects, in series
     async.series(projectsTasks, () => {
+        c.saveStat();
+
         if (!readline_on_finish) {
             return;
         }

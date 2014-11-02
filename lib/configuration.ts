@@ -19,20 +19,25 @@ import path = require('path');
 
 class Configuration {
     private _raw:string;
+    private _statRaw:string;
+
     private _projectFilled:boolean;
 
     filename:string;
-    statFile:string;
+    statFilename:string;
     content:any;
+    statContent:any;
     projects:any;
+    stats:any;
 
     constructor() {
         this._raw = "";
         this._projectFilled = false;
         this.filename = '';
-        this.statFile = '';
+        this.statFilename = '';
         this.content = {};
         this.projects = {};
+        this.statContent = {};
     }
 
     static defaults = {
@@ -67,9 +72,29 @@ class Configuration {
         }
 
         c.filename = filename;
-        c.statFile = u.replaceFileExtension(filename, '.gfstat');
+        c.statFilename = u.replaceFileExtension(filename, '.gfstat');
+
+        c._openStat();
 
         return c;
+    }
+
+    private _openStat():boolean {
+        try {
+            this._statRaw = fs.readFileSync(this.statFilename, 'utf8');
+        } catch (ex) {
+            this._statRaw = '';
+            return false;
+        }
+
+        try {
+            this.statContent = JSON.parse(this._statRaw);
+        } catch (ex) {
+            this.statContent = {};
+            return false;
+        }
+
+        return true;
     }
 
     fillProjects() {
@@ -96,7 +121,7 @@ class Configuration {
         return this;
     }
 
-    save(filename) {
+    save(filename?):boolean {
         if (!_.isString(filename)) {
             filename = this.filename;
         }
@@ -105,9 +130,35 @@ class Configuration {
 
         try {
             var os = require('os');
-            fs.writeFile(filename, jsConfig.replace(/\n/g, os.EOL) + os.EOL, 'utf8');
+            fs.writeFile(filename, jsConfig.replace(/\n/g, os.EOL) + os.EOL, {
+                encoding: 'utf8'
+            });
+
         } catch (ex) {
             o.error(nu.format("Unable to save configuration to '%s'", filename));
+            return false;
+        }
+
+        return true;
+    }
+
+    saveStat(filename?):boolean {
+        if (!_.isString(filename)) {
+            filename = this.statFilename;
+        }
+        console.log(this.statContent);
+
+        var jsStat = JSON.stringify(this.statContent);
+
+        try {
+            var os = require('os');
+            fs.writeFile(filename, jsStat.replace(/\n/g, os.EOL) + os.EOL, {
+                encoding: 'utf8'
+            });
+
+        } catch (ex) {
+            console.log(ex);
+            o.warning(nu.format("Unable to save stat to '%s'", filename));
             return false;
         }
 
