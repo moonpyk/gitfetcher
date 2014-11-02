@@ -133,7 +133,6 @@ class App {
 
         if (program['listProjects']) {
             console.log("Available projects :");
-
             _(conf.projects()).each((p, key) => {
                 console.log(util.format(
                     " - %s (%s)",
@@ -166,6 +165,7 @@ class App {
             if (!readline_on_finish) {
                 return;
             }
+
             console.log("Press any key to finish...");
 
             u.prompt(function () {
@@ -307,14 +307,14 @@ class App {
         this.setOption(this.program['unsetOption'], undefined);
     }
 
-    fail(code?) {
+    fail(code?:number) {
         if (!_.isNumber(code)) {
             code = 1;
         }
 
         if (readline_on_fail) {
             console.log("Error encountered, press any key to finish...");
-            u.prompt(function () {
+            u.prompt(() => {
                 process.exit(code);
             });
             return;

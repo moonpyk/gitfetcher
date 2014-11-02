@@ -18,8 +18,21 @@ import o = require('./output');
 import path = require('path');
 import os = require('os');
 
-interface ProjectConfiguration {
-
+interface IProjectConfiguration {
+    enabled: any;
+    context: any;
+    fetch_all: any;
+    fetch_tags: any;
+    pull: any;
+    pull_ff_only: any;
+    force_gc: any;
+    force_gc_aggressive: any;
+    force_gc_prune: any;
+    gc_interval: any;
+    // TODO: aggressive_gc_interval : 0
+    // Have to be overridden by the project
+    path: any;
+    rpath: any;
 }
 
 class Configuration {
@@ -69,7 +82,7 @@ class Configuration {
         rpath: null
     };
 
-    static open(filename:string) {
+    static open(filename:string):Configuration {
         var c = new Configuration();
 
         if (c._open(filename) === false) {
@@ -102,7 +115,7 @@ class Configuration {
         return true;
     }
 
-    projects() {
+    projects():{[key:string] : IProjectConfiguration} {
         if (this._projectsFilled) {
             return this._projects;
         }
@@ -179,10 +192,11 @@ class Configuration {
         return stat['fetch'] || 0;
     }
 
-    fetchIncrement(pKey:string) {
+    fetchIncrement(pKey:string):number {
         var ic = this.fetchGet(pKey);
 
         this.statContent[pKey]['fetch'] = ic + 1;
+        return this.statContent[pKey];
     }
 
     static getDefaults() {

@@ -24,7 +24,7 @@ function fixPrefix(prefix):string {
     return prefix;
 }
 
-function getColor(text:string, color:any) {
+function getColor(text:string, color:any):string {
     if (process['colorEnabled']) {
         if (!_.isArray(color)) {
             color = [color];
@@ -38,7 +38,7 @@ function getColor(text:string, color:any) {
     return text;
 }
 
-export function error(m, prefix?:string) {
+export function error(m, prefix?:string):void {
     console.log(
         OUT_FORMAT,
         fixPrefix(prefix),
@@ -47,7 +47,7 @@ export function error(m, prefix?:string) {
     );
 }
 
-export function warning(m, prefix?:string) {
+export function warning(m, prefix?:string):void {
     console.log(
         OUT_FORMAT,
         fixPrefix(prefix),
@@ -56,7 +56,7 @@ export function warning(m, prefix?:string) {
     );
 }
 
-export function info(m, prefix?:string) {
+export function info(m, prefix?:string):void {
     console.log(
         OUT_FORMAT,
         fixPrefix(prefix),
@@ -65,7 +65,7 @@ export function info(m, prefix?:string) {
     );
 }
 
-export function ok(m, prefix?:string) {
+export function ok(m, prefix?:string):void {
     console.log(
         OUT_FORMAT,
         fixPrefix(prefix),
@@ -74,7 +74,7 @@ export function ok(m, prefix?:string) {
     );
 }
 
-export function indent(spaces:number) {
+export function indent(spaces:number):string {
     var ret = '';
 
     for (var i = 0; i < spaces; i++) {

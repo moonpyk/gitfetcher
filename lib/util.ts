@@ -13,7 +13,7 @@
 import path = require('path');
 import _ = require('lodash');
 
-export function replaceFileExtension(val, newExt) {
+export function replaceFileExtension(val:string, newExt:string):string {
     if (!_.isString(val)) {
         return val;
     }
@@ -23,7 +23,7 @@ export function replaceFileExtension(val, newExt) {
     return val.substr(0, val.length - currentExt.length) + newExt;
 }
 
-export function inferString(val) {
+export function inferString(val:any):any {
     if (_.isString(val)) {
         var asInt = parseInt(val, 0),
             asFloat = parseFloat(val);
@@ -82,13 +82,13 @@ export function dotNotationToObject(path:string, value:any) {
     return ret;
 }
 
-export function resolveExpandEnv(f:string) {
+export function resolveExpandEnv(f:string):string {
     return path.resolve(
         path.normalize(expandEnv(f))
     );
 }
 
-export function expandEnv(val:any) {
+export function expandEnv(val:string):string {
     if (!_.isString(val)) {
         return val;
     }

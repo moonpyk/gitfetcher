@@ -46,7 +46,7 @@ class Project {
         }
     }
 
-    cmd(args) {
+    cmd(args):spawn.ChildProcess {
         var c = this.configuration;
 
         var opts = {
@@ -73,7 +73,7 @@ class Project {
         );
     }
 
-    inContext(ctx) {
+    inContext(ctx):boolean {
         if (_.isString(ctx) && !_.isEmpty(ctx)) {
             return _.contains(this.contextList, ctx);
         }
@@ -81,7 +81,7 @@ class Project {
         return true;
     }
 
-    check() {
+    check():boolean {
         var c = this.configuration;
 
         if (!fs.existsSync(c['rpath'])) {
@@ -91,7 +91,7 @@ class Project {
         return fs.existsSync(path.join(c['rpath'], ".git"));
     }
 
-    printName(cb:AsyncMultipleResultsCallback<any>) {
+    printName(cb:AsyncMultipleResultsCallback<any>):void {
         o.info(
             util.format("Project '%s'...", this.key), o.indent(2)
         );
@@ -99,7 +99,7 @@ class Project {
         Project.asyncCallback(0, cb);
     }
 
-    fetch(cb:AsyncMultipleResultsCallback<any>) {
+    fetch(cb:AsyncMultipleResultsCallback<any>):void {
         o.info("Fetching...", o.indent(4));
 
         var args = ['fetch'],
@@ -124,7 +124,7 @@ class Project {
         });
     }
 
-    pull(cb:AsyncMultipleResultsCallback<any>) {
+    pull(cb:AsyncMultipleResultsCallback<any>):void {
         o.info("Pulling...", o.indent(4));
 
         var args = ['pull'],
@@ -145,7 +145,7 @@ class Project {
         });
     }
 
-    gc(cb:AsyncSingleResultCallback<any>) {
+    gc(cb:AsyncSingleResultCallback<any>):void {
         o.info("GC...", o.indent(4));
 
         var args = ['gc'];
@@ -163,7 +163,7 @@ class Project {
         });
     }
 
-    force_gc(cb:AsyncSingleResultCallback<any>) {
+    force_gc(cb:AsyncSingleResultCallback<any>):void {
         o.info("Force GC...", o.indent(4));
 
         var args = ['gc'],
