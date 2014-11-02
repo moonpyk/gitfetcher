@@ -93,7 +93,7 @@ class Project {
             util.format("Project '%s'...", this.key), o.indent(2)
         );
 
-        callback(null, null);
+        Project.asyncCallback(0, callback);
     }
 
     fetch(callback:AsyncMultipleResultsCallback<any>) {

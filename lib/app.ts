@@ -83,7 +83,7 @@ class App {
             );
 
             if (parsed !== null) {
-                conf = parsed;
+                conf = this.configuration = parsed;
                 o.info(util.format("Using configuration file '%s'...", f));
             }
         });
@@ -198,20 +198,20 @@ class App {
         }
 
         // Project is enabled, populating the project tasks...
-        return function (callback:AsyncSingleResultCallback<any>) {
-            var tasks = [];
+        return (callback:AsyncSingleResultCallback<any>) => {
+            var tasks = {};
 
-            tasks.push(p.printName.bind(p));
+            tasks['print'] = p.printName.bind(p);
 
             if (!pretend) {
-                tasks.push(p.fetch.bind(p));
+                tasks['fetch'] = p.fetch.bind(p);
 
                 if (pConf['pull']) {
-                    tasks.push(p.pull.bind(p));
+                    tasks['pull'] = p.pull.bind(p);
                 }
 
                 if (pConf['force_gc']) {
-                    tasks.push(p.force_gc.bind(p));
+                    tasks['force_gc'] = p.force_gc.bind(p);
                 }
             }
 
@@ -220,6 +220,10 @@ class App {
                 if (exit_on_fail && _.isObject(err)) {
                     this.fail();
                     return;
+                }
+
+                if (_.isObject(res['fetch']) && res['fetch']['code'] == 0) {
+                    this.configuration.fetchIncrement(pKey);
                 }
                 callback(null, res);
             });

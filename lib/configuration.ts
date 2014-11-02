@@ -18,6 +18,10 @@ import o = require('./output');
 import path = require('path');
 import os = require('os');
 
+interface ProjectConfiguration {
+
+}
+
 class Configuration {
     private _raw:string;
     private _statRaw:string;
@@ -28,12 +32,13 @@ class Configuration {
     statFilename:string;
     content:any;
     statContent:any;
-    private _projects: { [id: string] : any; };
+    private _projects:{ [id: string] : any; };
 
     constructor() {
         this._raw = "";
         this._projectsFilled = false;
         this._projects = {};
+
         this.filename = '';
         this.statFilename = '';
         this.content = {};
@@ -159,6 +164,25 @@ class Configuration {
         }
 
         return true;
+    }
+
+    statFor(pKey:string) : any {
+        this.statContent = this.statContent || {};
+        this.statContent[pKey] = this.statContent[pKey] || {};
+
+        return this.statContent[pKey];
+    }
+
+    fetchGet(pKey:string) : number {
+        var stat = this.statFor(pKey);
+
+        return stat['fetch'] || 0;
+    }
+
+    fetchIncrement(pKey:string) {
+        var ic = this.fetchGet(pKey);
+
+        this.statContent[pKey]['fetch'] = ic + 1;
     }
 
     static getDefaults() {
