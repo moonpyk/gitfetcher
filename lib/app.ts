@@ -212,6 +212,10 @@ class App {
 
                 if (pConf['force_gc']) {
                     tasks['force_gc'] = p.force_gc.bind(p);
+                } else {
+                    if(this.configuration.fetchGet(pKey) % pConf['gc_interval'] == 0) {
+                        tasks['gc'] = p.gc.bind(p);
+                    }
                 }
             }
 

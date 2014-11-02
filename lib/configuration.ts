@@ -62,7 +62,7 @@ class Configuration {
         force_gc: false,
         force_gc_aggressive: false,
         force_gc_prune: null,
-        // TODO: gc_interval : 5,
+        gc_interval: 5,
         // TODO: aggressive_gc_interval : 0
         // Have to be overridden by the project
         path: null,
@@ -166,14 +166,14 @@ class Configuration {
         return true;
     }
 
-    statFor(pKey:string) : any {
+    statFor(pKey:string):any {
         this.statContent = this.statContent || {};
         this.statContent[pKey] = this.statContent[pKey] || {};
 
         return this.statContent[pKey];
     }
 
-    fetchGet(pKey:string) : number {
+    fetchGet(pKey:string):number {
         var stat = this.statFor(pKey);
 
         return stat['fetch'] || 0;

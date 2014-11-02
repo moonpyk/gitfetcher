@@ -142,6 +142,24 @@ class Project {
         });
     }
 
+    gc(callback:AsyncSingleResultCallback<any>) {
+        o.info("GC...", o.indent(4));
+
+        var args = ['gc'];
+
+        this.cmd(args).on('exit', (code) => {
+            if (code === 0) {
+                o.ok("Done.", o.indent(5));
+            } else {
+                o.error(
+                    util.format("Error during GC (%d).", code), o.indent(5)
+                );
+            }
+
+            Project.asyncCallback(code, callback);
+        });
+    }
+
     force_gc(callback:AsyncSingleResultCallback<any>) {
         o.info("Force GC...", o.indent(4));
 
