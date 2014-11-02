@@ -72,7 +72,8 @@ class App {
         }
 
         // Trying each possible path until found a valid configuration
-        _(confLookup).each((f) => {
+
+        confLookup.forEach((f) => {
             if (conf !== null) {
                 return;
             }
@@ -175,11 +176,11 @@ class App {
 
     handleProject(pKey:string, pConf:any, projectMode:boolean, context:string, pretend:boolean) {
         if (projectMode && !_.contains(this.program.args, pKey)) {
-            return;
+            return null;
         }
 
         if (!pConf['enabled']) {
-            return;
+            return null;
         }
 
         var p = new Project(pConf, pKey);
@@ -189,11 +190,11 @@ class App {
                 util.format("Project '%s' is now invalid, please check your configuration.", pKey),
                 o.indent(2)
             );
-            return;
+            return null;
         }
 
         if (!p.inContext(context)) {
-            return;
+            return null;
         }
 
         // Project is enabled, populating the project tasks...

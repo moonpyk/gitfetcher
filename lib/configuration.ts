@@ -22,17 +22,17 @@ class Configuration {
     private _raw:string;
     private _statRaw:string;
 
-    private _projectFilled:boolean;
+    private _projectsFilled:boolean;
 
     filename:string;
     statFilename:string;
     content:any;
     statContent:any;
-    projects:any;
+    projects: { [id: string] : any; };
 
     constructor() {
         this._raw = "";
-        this._projectFilled = false;
+        this._projectsFilled = false;
         this.filename = '';
         this.statFilename = '';
         this.content = {};
@@ -98,11 +98,11 @@ class Configuration {
     }
 
     fillProjects() {
-        if (this._projectFilled) {
-            return this;
+        if (this._projectsFilled) {
+            return this.projects;
         }
 
-        _(this.content).each((v, key) => {
+        this.content.forEach((v, key) => {
             if (key === "defaults") {
                 return;
             }
@@ -116,7 +116,7 @@ class Configuration {
             }
         });
 
-        this._projectFilled = true;
+        this._projectsFilled = true;
 
         return this.projects;
     }
@@ -129,7 +129,7 @@ class Configuration {
         var jsConfig = JSON.stringify(this.content, null, o.indent(4));
 
         try {
-            fs.writeFile(filename, jsConfig.replace(/\n/g, os.EOL) + os.EOL, {
+            fs.writeFileSync(filename, jsConfig.replace(/\n/g, os.EOL) + os.EOL, {
                 encoding: 'utf8'
             });
 
@@ -149,7 +149,7 @@ class Configuration {
         var jsStat = JSON.stringify(this.statContent);
 
         try {
-            fs.writeFile(filename, jsStat.replace(/\n/g, os.EOL) + os.EOL, {
+            fs.writeFileSync(filename, jsStat.replace(/\n/g, os.EOL) + os.EOL, {
                 encoding: 'utf8'
             });
 
