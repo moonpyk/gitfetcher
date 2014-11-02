@@ -12,8 +12,15 @@ module.exports = function (grunt) {
                     sourceMap: true,
                     comments: true
                 }
+            },
+            tests: {
+                src: ['test/*.ts'],
+                options: {
+                    module: "commonjs",
+                    sourceMap: true,
+                    comments: true
+                }
             }
-
         },
         nodeunit: {
             files: ['test/**/*_test.js']

@@ -1,6 +1,7 @@
 'use strict';
 
 import u = require('../lib/util');
+import nodeunit = require('nodeunit');
 
 /*
  ======== A Handy Little Nodeunit Reference ========
@@ -29,7 +30,36 @@ export function setUp(done) {
     done();
 }
 
-export function inferString(test) {
+export function replaceFileExtension(test:nodeunit.Test) {
+    test.equals(
+        u.replaceFileExtension('/qsdsd/qsdsqd/filename.json', '.html'),
+        '/qsdsd/qsdsqd/filename.html'
+    );
+
+    test.equals(
+        u.replaceFileExtension('/qsdsd/qsdsqd/filename.', '.json'),
+        '/qsdsd/qsdsqd/filename.json'
+    );
+
+    test.equals(
+        u.replaceFileExtension('/qsdsd/qsdsqd/filename', '.json'),
+        '/qsdsd/qsdsqd/filename.json'
+    );
+
+    test.equal(
+        u.replaceFileExtension('filename', '.json'),
+        'filename.json'
+    );
+
+    test.equal(
+        u.replaceFileExtension(null, '.tt'),
+        null
+    );
+
+    test.done();
+}
+
+export function inferString(test:nodeunit.Test) {
     test.equals(u.inferString("8"), 8);
     test.equals(u.inferString("8.8"), 8.8);
     test.equals(u.inferString("865464.887"), 865464.887);
@@ -51,7 +81,7 @@ export function inferString(test) {
     test.done();
 }
 
-export function dotNotationToObject(test) {
+export function dotNotationToObject(test:nodeunit.Test) {
     test.equals(u.dotNotationToObject('', 8), 8);
     test.equals(u.dotNotationToObject('....', 8), 8);
     test.deepEqual(u.dotNotationToObject('plop....', 8), {plop: 8});
@@ -61,7 +91,7 @@ export function dotNotationToObject(test) {
     test.done();
 }
 
-export function resolveExpandEnv(test) {
+export function resolveExpandEnv(test:nodeunit.Test) {
     if (process.platform == "win32") {
         test.equals(
             u.resolveExpandEnv("~/test/dir"),
@@ -77,7 +107,7 @@ export function resolveExpandEnv(test) {
     test.done();
 }
 
-export function expandEnv(test) {
+export function expandEnv(test:nodeunit.Test) {
     var ev = process.env;
 
     if (process.platform == "win32") {

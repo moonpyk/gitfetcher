@@ -13,6 +13,16 @@
 import path = require('path');
 import _ = require('lodash');
 
+export function replaceFileExtension(val, newExt) {
+    if (!_.isString(val)) {
+        return val;
+    }
+
+    var currentExt = path.extname(val);
+
+    return val.substr(0, val.length - currentExt.length) + newExt;
+}
+
 export function inferString(val) {
     if (_.isString(val)) {
         var asInt = parseInt(val, 0),

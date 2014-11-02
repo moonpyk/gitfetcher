@@ -15,12 +15,14 @@ import u = require('./util');
 import nu = require('util');
 import _ = require('lodash');
 import o = require('./output');
+import path = require('path');
 
 class Configuration {
     private _raw:string;
     private _projectFilled:boolean;
 
     filename:string;
+    statFile:string;
     content:any;
     projects:any;
 
@@ -28,6 +30,7 @@ class Configuration {
         this._raw = "";
         this._projectFilled = false;
         this.filename = '';
+        this.statFile = '';
         this.content = {};
         this.projects = {};
     }
@@ -64,6 +67,7 @@ class Configuration {
         }
 
         c.filename = filename;
+        c.statFile = u.replaceFileExtension(filename, '.gfstat');
 
         return c;
     }
