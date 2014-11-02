@@ -88,15 +88,15 @@ class Project {
         return fs.existsSync(path.join(c['rpath'], ".git"));
     }
 
-    printName(callback:AsyncMultipleResultsCallback<any>) {
+    printName(cb:AsyncMultipleResultsCallback<any>) {
         o.info(
             util.format("Project '%s'...", this.key), o.indent(2)
         );
 
-        Project.asyncCallback(0, callback);
+        Project.asyncCallback(0, cb);
     }
 
-    fetch(callback:AsyncMultipleResultsCallback<any>) {
+    fetch(cb:AsyncMultipleResultsCallback<any>) {
         o.info("Fetching...", o.indent(4));
 
         var args = ['fetch'],
@@ -117,11 +117,11 @@ class Project {
                 o.error(util.format("Error during fetch (%d).", code), o.indent(5));
             }
 
-            Project.asyncCallback(code, callback);
+            Project.asyncCallback(code, cb);
         });
     }
 
-    pull(callback:AsyncMultipleResultsCallback<any>) {
+    pull(cb:AsyncMultipleResultsCallback<any>) {
         o.info("Pulling...", o.indent(4));
 
         var args = ['pull'],
@@ -138,11 +138,11 @@ class Project {
                 o.error(util.format("Error during pull (%d).", code), o.indent(5));
             }
 
-            Project.asyncCallback(code, callback);
+            Project.asyncCallback(code, cb);
         });
     }
 
-    gc(callback:AsyncSingleResultCallback<any>) {
+    gc(cb:AsyncSingleResultCallback<any>) {
         o.info("GC...", o.indent(4));
 
         var args = ['gc'];
@@ -156,11 +156,11 @@ class Project {
                 );
             }
 
-            Project.asyncCallback(code, callback);
+            Project.asyncCallback(code, cb);
         });
     }
 
-    force_gc(callback:AsyncSingleResultCallback<any>) {
+    force_gc(cb:AsyncSingleResultCallback<any>) {
         o.info("Force GC...", o.indent(4));
 
         var args = ['gc'],
@@ -183,7 +183,7 @@ class Project {
                 );
             }
 
-            Project.asyncCallback(code, callback);
+            Project.asyncCallback(code, cb);
         });
     }
 }
