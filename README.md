@@ -30,8 +30,6 @@ An example configuration is available inside the project directory.
 
 On *nix, git is usually available at `/usr/bin/git` location, on Windows `C:\Program Files\Git\cmd\git.exe` or `C:\Program Files (x86)\Git\cmd\git.exe` on 64bits versions.
 
-A pretty cool utility to fetch/pull from multiple git repositories configured as projects.
-
 ## License
 Copyright (c) 2013 Clément Bourgeois  
 Licensed under the MIT license.
