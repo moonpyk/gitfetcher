@@ -151,6 +151,11 @@ class App {
             pretend = _.isBoolean(program['pretend']) && program['pretend'],
             projectMode = _.isArray(program.args) && program.args.length > 0;
 
+        // No provided cmd context, trying the default one
+        if (_.isEmpty(context) && !_.isEmpty(cnf.Configuration.defaults.default_context)) {
+            context = cnf.Configuration.defaults.default_context;
+        }
+
         // For each projects, we create of list of tasks, depending
         // on each project configuration. Each project is a task of tasks.
         var projectsTasks = _(conf.projects()).map((pConf:cnf.IProjectConfiguration, pKey:string) => {
