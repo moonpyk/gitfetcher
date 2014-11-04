@@ -16,7 +16,7 @@ import fs = require('fs');
 import _ = require('lodash');
 import async = require('async');
 import program = require('commander');
-import util = require('util');
+import nu = require('util');
 
 import u = require('./util');
 import o = require('./output');
@@ -89,14 +89,14 @@ class App {
 
             if (parsed !== null) {
                 conf = this.configuration = parsed;
-                o.info(util.format("Using configuration file '%s'...", f));
+                o.info(nu.format("Using configuration file '%s'...", f));
             }
         });
 
         // Definitely no valid config has been found
         if (conf === null) {
             if (confLookup.length == 1) {
-                o.error(util.format("Unable to read config file '%s'.", confLookup[0]));
+                o.error(nu.format("Unable to read config file '%s'.", confLookup[0]));
             } else {
                 o.error("No config file found, aborting.");
             }
@@ -140,10 +140,10 @@ class App {
         if (program['listProjects']) {
             console.log("Available projects :");
             _(conf.projects()).each((p, key) => {
-                console.log(util.format(
+                console.log(nu.format(
                     " - %s (%s)",
                     key,
-                    util.inspect(conf.content[key], false, undefined, true)
+                    nu.inspect(conf.content[key], false, undefined, true)
                 ));
             });
             return;
@@ -198,7 +198,7 @@ class App {
 
         if (!p.check()) {
             o.warning(
-                util.format("Project '%s' is now invalid, please check your configuration.", pKey),
+                nu.format("Project '%s' is now invalid, please check your configuration.", pKey),
                 o.indent(2)
             );
             return null;
@@ -264,12 +264,12 @@ class App {
 
                 if (c.save()) {
                     o.ok(
-                        util.format("Project '%s' saved to configuration file '%s", projectName, c.filename)
+                        nu.format("Project '%s' saved to configuration file '%s", projectName, c.filename)
                     );
                 }
             } else {
                 o.error(
-                    util.format("Directory '%s' doesn't appears to be a valid git project working copy", projectDir)
+                    nu.format("Directory '%s' doesn't appears to be a valid git project working copy", projectDir)
                 );
             }
         });
