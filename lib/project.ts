@@ -13,9 +13,11 @@
 import spawn = require('child_process');
 import fs = require('fs');
 import path = require('path');
-import _ = require("lodash");
-import u = require('./util');
 import util = require('util');
+
+import _ = require("lodash");
+
+import u = require('./util');
 import Configuration = require('./configuration');
 import o = require("./output");
 

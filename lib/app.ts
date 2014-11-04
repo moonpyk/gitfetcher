@@ -12,11 +12,11 @@
 
 import path = require('path');
 import fs = require('fs');
+import nu = require('util');
 
 import _ = require('lodash');
 import async = require('async');
 import program = require('commander');
-import nu = require('util');
 
 import u = require('./util');
 import o = require('./output');
@@ -135,7 +135,6 @@ class App {
             this.unsetOption();
             return;
         }
-
 
         if (program['listProjects']) {
             console.log("Available projects :");

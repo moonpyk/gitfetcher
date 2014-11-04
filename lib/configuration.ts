@@ -11,12 +11,14 @@
 "use strict";
 
 import fs = require('fs');
-import u = require('./util');
-import nu = require('util');
-import _ = require('lodash');
-import o = require('./output');
 import path = require('path');
 import os = require('os');
+import nu = require('util');
+
+import _ = require('lodash');
+
+import o = require('./output');
+import u = require('./util');
 
 export interface IProjectConfiguration {
     enabled: boolean;
