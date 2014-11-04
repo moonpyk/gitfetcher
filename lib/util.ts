@@ -2,7 +2,7 @@
  * gitfetcher
  * https://github.com/moonpyk/gitfetcher
  *
- * Copyright (c) 2013 Clément Bourgeois
+ * Copyright (c) 2014 Clément Bourgeois
  * Licensed under the MIT license.
  */
 

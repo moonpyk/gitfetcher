@@ -2,7 +2,7 @@
  * gitfetcher
  * https://github.com/moonpyk/gitfetcher
  *
- * Copyright (c) 2013 Clément Bourgeois
+ * Copyright (c) 2014 Clément Bourgeois
  * Licensed under the MIT license.
  */
 
@@ -39,7 +39,7 @@ function getColor(text:string, color:any):string {
 }
 
 export function error(m, prefix?:string):void {
-    console.log(
+    console.error(
         OUT_FORMAT,
         fixPrefix(prefix),
         getColor('ERR', ['red', 'bold']),
@@ -48,7 +48,7 @@ export function error(m, prefix?:string):void {
 }
 
 export function warning(m, prefix?:string):void {
-    console.log(
+    console.warn(
         OUT_FORMAT,
         fixPrefix(prefix),
         getColor('WARN', ['yellow', 'bold']),

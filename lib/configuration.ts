@@ -2,7 +2,7 @@
  * gitfetcher
  * https://github.com/moonpyk/gitfetcher
  *
- * Copyright (c) 2013 Clément Bourgeois
+ * Copyright (c) 2014 Clément Bourgeois
  * Licensed under the MIT license.
  */
 
@@ -122,7 +122,7 @@ export class Configuration {
                 return;
             }
 
-            this._projects[key] = Configuration._makeProject(this.content[key]);
+            this._projects[key] = Configuration.makeProject(this.content[key]);
 
             if (_.isString(this._projects[key].path)) {
                 this._projects[key].rpath = u.resolveExpandEnv(
@@ -141,10 +141,10 @@ export class Configuration {
             filename = this.filename;
         }
 
-        var jsConfig = JSON.stringify(this.content, null, o.indent(4));
+        var rawConfig = JSON.stringify(this.content, null, o.indent(4));
 
         try {
-            fs.writeFileSync(filename, jsConfig.replace(/\n/g, os.EOL) + os.EOL, {
+            fs.writeFileSync(filename, Configuration.fixNewLines(rawConfig), {
                 encoding: 'utf8'
             });
 
@@ -156,6 +156,44 @@ export class Configuration {
         return true;
     }
 
+    static initConfig(filename:string, confLookup:string[]) {
+        if (_.isEmpty(filename)) {
+            if (process.platform == 'win32') {
+                filename = confLookup[1];
+            } else {
+                filename = confLookup[0];
+            }
+        }
+        var realPath = u.resolveExpandEnv(filename);
+
+        if (fs.existsSync(realPath)) {
+            o.error(nu.format("'%s' configuration file already exists", realPath));
+            return false;
+        }
+
+        var futureConf = {
+            defaults: _.clone(Configuration.defaults)
+        };
+
+        for (var k in {'context': 0, 'path': 0, 'rpath': 0}) {
+            delete futureConf['defaults'][k];
+        }
+
+        var confString = JSON.stringify(futureConf, null, o.indent(4));
+
+        try {
+            fs.writeFileSync(realPath, Configuration.fixNewLines(confString), {
+                encoding: 'utf8'
+            });
+        } catch (err) {
+            o.error(nu.format("Unable to write to write new configuration file at '%s'", realPath));
+            return false;
+        }
+
+        o.ok(nu.format("New gitfetcher configuration file created at '%s'", realPath));
+        return true;
+    }
+
     saveStat(filename?):boolean {
         if (!_.isString(filename)) {
             filename = this.statFilename;
@@ -164,7 +202,7 @@ export class Configuration {
         var jsStat = JSON.stringify(this.statContent);
 
         try {
-            fs.writeFileSync(filename, jsStat.replace(/\n/g, os.EOL) + os.EOL, {
+            fs.writeFileSync(filename, Configuration.fixNewLines(jsStat), {
                 encoding: 'utf8'
             });
 
@@ -194,17 +232,6 @@ export class Configuration {
 
         this.statContent[pKey]['fetch'] = ic + 1;
         return this.statContent[pKey];
-    }
-
-    static getDefaults():IApplicationConfiguration {
-        return _.clone(Configuration.defaults);
-    }
-
-    private static _makeProject(proj:any):IProjectConfiguration {
-        return _.extend<any, any, any, any, IProjectConfiguration>(
-            Configuration.getDefaults(),
-            proj
-        );
     }
 
     private _open(filename):any {
@@ -237,5 +264,20 @@ export class Configuration {
         }
 
         return filename;
+    }
+
+    static getDefaults():IApplicationConfiguration {
+        return _.clone(Configuration.defaults);
+    }
+
+    private static makeProject(proj:any):IProjectConfiguration {
+        return _.extend<any, any, any, any, IProjectConfiguration>(
+            Configuration.getDefaults(),
+            proj
+        );
+    }
+
+    private static fixNewLines(text:string):string {
+        return text.replace(/\n/g, os.EOL) + os.EOL;
     }
 }

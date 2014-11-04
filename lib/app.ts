@@ -2,7 +2,7 @@
  * gitfetcher
  * https://github.com/moonpyk/gitfetcher
  *
- * Copyright (c) 2013 Clément Bourgeois
+ * Copyright (c) 2014 Clément Bourgeois
  * Licensed under the MIT license.
  */
 
@@ -53,7 +53,8 @@ class App {
             .option('-N, --no-color', 'Disable output-coloring even if available')
             .option('-p, --pretend', "Don't do anything, just pretend")
             .option('-R, --reformat', 'Reformat the config file to have pretty JSON')
-            .option('-x, --context <context>', 'Run inside context <context>');
+            .option('-x, --context <context>', 'Run inside context <context>')
+            .option('--init-config [filename]', 'Init a new gitfetcher in filename [filename]', '');
     }
 
     main(argv) {
@@ -64,6 +65,11 @@ class App {
         }
 
         var conf = this.configuration = null;
+
+        if (_.isString(program['initConfig'])) {
+            this.initConfig(program['initConfig']);
+            return;
+        }
 
         // If a specific configuration file has been given
         // we reset the default lookups to use only that precise one.
@@ -129,6 +135,7 @@ class App {
             this.unsetOption();
             return;
         }
+
 
         if (program['listProjects']) {
             console.log("Available projects :");
@@ -266,6 +273,12 @@ class App {
                 );
             }
         });
+    }
+
+    initConfig(filename?:string){
+        if(!cnf.Configuration.initConfig(filename, confLookup)) {
+            this.fail();
+        }
     }
 
     editConfig() {
