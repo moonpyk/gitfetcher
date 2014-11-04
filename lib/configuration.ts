@@ -158,45 +158,6 @@ export class Configuration {
         return true;
     }
 
-    static initConfig(filename:string, confLookup:string[]) {
-        if (_.isEmpty(filename)) {
-            if (process.platform == 'win32') {
-                filename = confLookup[1];
-            } else {
-                filename = confLookup[0];
-            }
-        }
-
-        var realPath = u.resolveExpandEnv(filename);
-
-        if (fs.existsSync(realPath)) {
-            o.error(nu.format("'%s' configuration file already exists", realPath));
-            return false;
-        }
-
-        var futureConf = {
-            defaults: _.clone(Configuration.defaults)
-        };
-
-        for (var k in {'context': 0, 'path': 0, 'rpath': 0}) {
-            delete futureConf['defaults'][k];
-        }
-
-        var confString = JSON.stringify(futureConf, null, o.indent(4));
-
-        try {
-            fs.writeFileSync(realPath, Configuration.fixNewLines(confString), {
-                encoding: 'utf8'
-            });
-        } catch (err) {
-            o.error(nu.format("Unable to write to write new configuration file at '%s'", realPath));
-            return false;
-        }
-
-        o.ok(nu.format("New gitfetcher configuration file created at '%s'", realPath));
-        return true;
-    }
-
     saveStat(filename?):boolean {
         if (!_.isString(filename)) {
             filename = this.statFilename;
@@ -267,6 +228,45 @@ export class Configuration {
         }
 
         return filename;
+    }
+
+    static initConfig(filename:string, confLookup:string[]) {
+        if (_.isEmpty(filename)) {
+            if (process.platform == 'win32') {
+                filename = confLookup[1];
+            } else {
+                filename = confLookup[0];
+            }
+        }
+
+        var realPath = u.resolveExpandEnv(filename);
+
+        if (fs.existsSync(realPath)) {
+            o.error(nu.format("'%s' configuration file already exists", realPath));
+            return false;
+        }
+
+        var futureConf = {
+            defaults: _.clone(Configuration.defaults)
+        };
+
+        for (var k in {'context': 0, 'path': 0, 'rpath': 0}) {
+            delete futureConf['defaults'][k];
+        }
+
+        var confString = JSON.stringify(futureConf, null, o.indent(4));
+
+        try {
+            fs.writeFileSync(realPath, Configuration.fixNewLines(confString), {
+                encoding: 'utf8'
+            });
+        } catch (err) {
+            o.error(nu.format("Unable to write to write new configuration file at '%s'", realPath));
+            return false;
+        }
+
+        o.ok(nu.format("New gitfetcher configuration file created at '%s'", realPath));
+        return true;
     }
 
     static getDefaults():IApplicationConfiguration {
