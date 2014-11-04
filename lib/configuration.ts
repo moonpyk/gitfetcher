@@ -18,52 +18,49 @@ import o = require('./output');
 import path = require('path');
 import os = require('os');
 
-interface IProjectConfiguration {
-    enabled: any;
+export interface IProjectConfiguration {
+    enabled: boolean;
     context: any;
-    fetch_all: any;
-    fetch_tags: any;
-    pull: any;
-    pull_ff_only: any;
-    force_gc: any;
-    force_gc_aggressive: any;
-    force_gc_prune: any;
-    gc_interval: any;
+    fetch_all: boolean;
+    fetch_tags: boolean;
+    pull: boolean;
+    pull_ff_only: boolean;
+    force_gc: boolean;
+    force_gc_aggressive: boolean;
+    force_gc_prune: boolean;
+    gc_interval: number;
     // TODO: aggressive_gc_interval : 0
     // Have to be overridden by the project
-    path: any;
-    rpath: any;
+    path: string;
+    rpath: string;
 }
 
-class Configuration {
-    private _raw:string;
+export interface IApplicationConfiguration extends IProjectConfiguration {
+    print_git_out: boolean;
+    exit_on_fail: boolean;
+    readline_on_fail: boolean;
+    readline_on_finish: boolean;
+    default_context: string;
+}
+
+export class Configuration {
+    private _raw:string = '';
     private _statRaw:string;
+    private _projects:{ [id: string] : any; } = {};
+    private _projectsFilled:boolean = false;
 
-    private _projectsFilled:boolean;
+    filename:string = '';
+    statFilename:string = '';
+    content:any = {};
+    statContent:any = {};
 
-    filename:string;
-    statFilename:string;
-    content:any;
-    statContent:any;
-    private _projects:{ [id: string] : any; };
-
-    constructor() {
-        this._raw = "";
-        this._projectsFilled = false;
-        this._projects = {};
-
-        this.filename = '';
-        this.statFilename = '';
-        this.content = {};
-        this.statContent = {};
-    }
-
-    static defaults = {
+    static defaults:IApplicationConfiguration = {
         // Application variables
         print_git_out: true,
         exit_on_fail: false,
         readline_on_fail: false,
         readline_on_finish: false,
+        default_context: null,
         // TODO: write_log : false,
         // Project defined
         enabled: true,
@@ -199,12 +196,15 @@ class Configuration {
         return this.statContent[pKey];
     }
 
-    static getDefaults() {
+    static getDefaults():IApplicationConfiguration {
         return _.clone(Configuration.defaults);
     }
 
-    private static _makeProject(proj) {
-        return _.extend(Configuration.getDefaults(), proj);
+    private static _makeProject(proj:any):IProjectConfiguration {
+        return _.extend<any, any, any, any, IProjectConfiguration>(
+            Configuration.getDefaults(),
+            proj
+        );
     }
 
     private _open(filename):any {
@@ -239,5 +239,3 @@ class Configuration {
         return filename;
     }
 }
-
-export = Configuration;

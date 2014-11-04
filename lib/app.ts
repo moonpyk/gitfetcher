@@ -20,7 +20,7 @@ import util = require('util');
 
 import u = require('./util');
 import o = require('./output');
-import Configuration = require('./configuration');
+import cnf = require('./configuration');
 import Project = require("./project");
 
 var confLookup = [
@@ -38,7 +38,7 @@ process['colorEnabled'] = true;
 
 class App {
     program:commander.ICommand;
-    configuration:Configuration;
+    configuration:cnf.Configuration;
 
     constructor() {
         this.program = program
@@ -78,7 +78,7 @@ class App {
                 return;
             }
 
-            var parsed = Configuration.open(
+            var parsed = cnf.Configuration.open(
                 u.resolveExpandEnv(f)
             );
 
@@ -143,9 +143,9 @@ class App {
             return;
         }
 
-        exit_on_fail = Configuration.defaults.exit_on_fail;
-        readline_on_fail = Configuration.defaults.readline_on_fail;
-        readline_on_finish = Configuration.defaults.readline_on_finish;
+        exit_on_fail = cnf.Configuration.defaults.exit_on_fail;
+        readline_on_fail = cnf.Configuration.defaults.readline_on_fail;
+        readline_on_finish = cnf.Configuration.defaults.readline_on_finish;
 
         // Valid config found, filling the projects configurations.
         var context = _.isString(program['context']) && !_.isEmpty(program['context']) ? program['context'] : null,
@@ -154,7 +154,7 @@ class App {
 
         // For each projects, we create of list of tasks, depending
         // on each project configuration. Each project is a task of tasks.
-        var projectsTasks = _(conf.projects()).map((pConf, pKey) => {
+        var projectsTasks = _(conf.projects()).map((pConf:cnf.IProjectConfiguration, pKey) => {
             return this.handleProject(pKey, pConf, projectMode, context, pretend);
         }).filter(p => _.isFunction(p)).value();
 
@@ -174,12 +174,12 @@ class App {
         });
     }
 
-    handleProject(pKey:string, pConf:any, projectMode:boolean, context:string, pretend:boolean) {
+    handleProject(pKey:string, pConf:cnf.IProjectConfiguration, projectMode:boolean, context:string, pretend:boolean) {
         if (projectMode && !_.contains(this.program.args, pKey)) {
             return null;
         }
 
-        if (!pConf['enabled']) {
+        if (!pConf.enabled) {
             return null;
         }
 
@@ -206,14 +206,14 @@ class App {
             if (!pretend) {
                 tasks['fetch'] = p.fetch.bind(p);
 
-                if (pConf['pull']) {
+                if (pConf.pull) {
                     tasks['pull'] = p.pull.bind(p);
                 }
 
-                if (pConf['force_gc']) {
+                if (pConf.force_gc) {
                     tasks['force_gc'] = p.force_gc.bind(p);
                 } else {
-                    if (this.configuration.fetchGet(pKey) % pConf['gc_interval'] === 0) {
+                    if (this.configuration.fetchGet(pKey) % pConf.gc_interval === 0) {
                         tasks['gc'] = p.gc.bind(p);
                     }
                 }
