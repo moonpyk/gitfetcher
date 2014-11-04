@@ -54,7 +54,7 @@ class App {
             .option('-p, --pretend', "Don't do anything, just pretend")
             .option('-R, --reformat', 'Reformat the config file to have pretty JSON')
             .option('-x, --context <context>', 'Run inside context <context>')
-            .option('--init-config [filename]', 'Init a new gitfetcher in filename [filename]', '');
+            .option('--init-config', 'Init a new gitfetcher in filename');
     }
 
     main(argv) {
@@ -66,8 +66,8 @@ class App {
 
         var conf = this.configuration = null;
 
-        if (_.isString(program['initConfig'])) {
-            this.initConfig(program['initConfig']);
+        if (_.isBoolean(program['initConfig'])) {
+            this.initConfig();
             return;
         }
 
@@ -78,7 +78,7 @@ class App {
         }
 
         // Trying each possible path until found a valid configuration
-        confLookup.forEach((f) => {
+        _.each(confLookup, (f) => {
             if (conf !== null) {
                 return;
             }
@@ -274,8 +274,8 @@ class App {
         });
     }
 
-    initConfig(filename?:string){
-        if(!cnf.Configuration.initConfig(filename, confLookup)) {
+    initConfig() {
+        if (!cnf.Configuration.initConfig(null, confLookup)) {
             this.fail();
         }
     }

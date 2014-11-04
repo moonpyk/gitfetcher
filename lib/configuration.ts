@@ -166,6 +166,7 @@ export class Configuration {
                 filename = confLookup[0];
             }
         }
+
         var realPath = u.resolveExpandEnv(filename);
 
         if (fs.existsSync(realPath)) {
