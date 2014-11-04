@@ -72,7 +72,6 @@ class App {
         }
 
         // Trying each possible path until found a valid configuration
-
         confLookup.forEach((f) => {
             if (conf !== null) {
                 return;
@@ -154,7 +153,7 @@ class App {
 
         // For each projects, we create of list of tasks, depending
         // on each project configuration. Each project is a task of tasks.
-        var projectsTasks = _(conf.projects()).map((pConf:cnf.IProjectConfiguration, pKey) => {
+        var projectsTasks = _(conf.projects()).map((pConf:cnf.IProjectConfiguration, pKey:string) => {
             return this.handleProject(pKey, pConf, projectMode, context, pretend);
         }).filter(p => _.isFunction(p)).value();
 

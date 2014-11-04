@@ -51,10 +51,10 @@ class Project {
 
         var opts = {
             env: process.env,
-            cwd: c['rpath']
+            cwd: c.rpath
         };
 
-        if (c['print_git_out']) {
+        if (c.print_git_out) {
             _.extend(opts, {
                 stdio: ['ignore', process.stdout, process.stderr]
             });
@@ -84,11 +84,11 @@ class Project {
     check():boolean {
         var c = this.configuration;
 
-        if (!fs.existsSync(c['rpath'])) {
+        if (!fs.existsSync(c.rpath)) {
             return false;
         }
 
-        return fs.existsSync(path.join(c['rpath'], ".git"));
+        return fs.existsSync(path.join(c.rpath, ".git"));
     }
 
     printName(cb:AsyncMultipleResultsCallback<any>):void {
@@ -105,11 +105,11 @@ class Project {
         var args = ['fetch'],
             c = this.configuration;
 
-        if (_.isBoolean(c['fetch_all']) && c['fetch_all']) {
+        if (_.isBoolean(c.fetch_all) && c.fetch_all) {
             args.push('--all');
         }
 
-        if (_.isBoolean(c['fetch_tags']) && c['fetch_tags']) {
+        if (_.isBoolean(c.fetch_tags) && c.fetch_tags) {
             args.push('--tags');
         }
 
@@ -130,7 +130,7 @@ class Project {
         var args = ['pull'],
             c = this.configuration;
 
-        if (_.isBoolean(c['pull_ff_only']) && c['pull_ff_only']) {
+        if (_.isBoolean(c.pull_ff_only) && c.pull_ff_only) {
             args.push('--ff-only');
         }
 
@@ -169,12 +169,12 @@ class Project {
         var args = ['gc'],
             c = this.configuration;
 
-        if (_.isBoolean(c['force_gc_aggressive']) && c['force_gc_aggressive']) {
+        if (_.isBoolean(c.force_gc_aggressive) && c.force_gc_aggressive) {
             args.push('--aggressive');
         }
 
-        if (_.isString(c['force_gc_prune']) && !_.isEmpty(c['force_gc_prune'])) {
-            args.push('--prune=' + c['force_gc_prune']);
+        if (_.isString(c.force_gc_prune) && !_.isEmpty(c.force_gc_prune)) {
+            args.push('--prune=' + c.force_gc_prune);
         }
 
         this.cmd(args).on('exit', (code) => {

@@ -20,6 +20,7 @@ import os = require('os');
 
 export interface IProjectConfiguration {
     enabled: boolean;
+    print_git_out: boolean;
     context: any;
     fetch_all: boolean;
     fetch_tags: boolean;
@@ -36,7 +37,6 @@ export interface IProjectConfiguration {
 }
 
 export interface IApplicationConfiguration extends IProjectConfiguration {
-    print_git_out: boolean;
     exit_on_fail: boolean;
     readline_on_fail: boolean;
     readline_on_finish: boolean;
