@@ -54,7 +54,7 @@ class App {
             .option('-p, --pretend', "Don't do anything, just pretend")
             .option('-R, --reformat', 'Reformat the config file to have pretty JSON')
             .option('-x, --context <context>', 'Run inside context <context>')
-            .option('--init-config', 'Init a new gitfetcher in filename');
+            .option('--init-config', 'Init a new gitfetcher configuration at default location');
     }
 
     main(argv) {
@@ -329,7 +329,7 @@ class App {
         }
 
         if (readline_on_fail) {
-            console.log("Error encountered, press any key to finish...");
+            console.error("Error encountered, press any key to finish...");
             u.prompt(() => {
                 process.exit(code);
             });

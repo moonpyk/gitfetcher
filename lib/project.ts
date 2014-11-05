@@ -13,7 +13,7 @@
 import spawn = require('child_process');
 import fs = require('fs');
 import path = require('path');
-import util = require('util');
+import nu = require('util');
 
 import _ = require("lodash");
 
@@ -22,13 +22,12 @@ import Configuration = require('./configuration');
 import o = require("./output");
 
 class Project {
+    contextList:string[] = [];
     configuration:any;
-    contextList:string[];
     key:string;
 
     constructor(c, key:string) {
         this.configuration = c;
-        this.contextList = [];
         this.key = key;
 
         if (_.isString(c.context)) {
@@ -39,10 +38,12 @@ class Project {
         }
     }
 
-    private static asyncCallback(code, fn) {
-        if (_.isFunction(fn)) {
-            fn(
-                code !== 0 ? new Error() : null,
+    private static asyncCallback(code:number, cb:AsyncSingleResultCallback<any>) {
+        if (_.isFunction(cb)) {
+            cb(
+                code !== 0
+                    ? new Error(nu.format("git returned code : %d", code))
+                    : null,
                 {code: 0}
             );
         }
@@ -75,7 +76,7 @@ class Project {
         );
     }
 
-    inContext(ctx):boolean {
+    inContext(ctx:string):boolean {
         if (_.isString(ctx) && !_.isEmpty(ctx)) {
             return _.contains(this.contextList, ctx);
         }
@@ -95,7 +96,7 @@ class Project {
 
     printName(cb:AsyncMultipleResultsCallback<any>):void {
         o.info(
-            util.format("Project '%s'...", this.key), o.indent(2)
+            nu.format("Project '%s'...", this.key), o.indent(2)
         );
 
         Project.asyncCallback(0, cb);
@@ -119,7 +120,7 @@ class Project {
             if (code === 0) {
                 o.ok("Done.", o.indent(5));
             } else {
-                o.error(util.format("Error during fetch (%d).", code), o.indent(5));
+                o.error(nu.format("Error during fetch (%d).", code), o.indent(5));
             }
 
             Project.asyncCallback(code, cb);
@@ -140,7 +141,7 @@ class Project {
             if (code === 0) {
                 o.ok("Done.", o.indent(5));
             } else {
-                o.error(util.format("Error during pull (%d).", code), o.indent(5));
+                o.error(nu.format("Error during pull (%d).", code), o.indent(5));
             }
 
             Project.asyncCallback(code, cb);
@@ -157,7 +158,7 @@ class Project {
                 o.ok("Done.", o.indent(5));
             } else {
                 o.error(
-                    util.format("Error during GC (%d).", code), o.indent(5)
+                    nu.format("Error during GC (%d).", code), o.indent(5)
                 );
             }
 
@@ -184,7 +185,7 @@ class Project {
                 o.ok("Done.", o.indent(5));
             } else {
                 o.error(
-                    util.format("Error during force GC (%d).", code), o.indent(5)
+                    nu.format("Error during force GC (%d).", code), o.indent(5)
                 );
             }
 

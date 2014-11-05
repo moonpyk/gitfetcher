@@ -25,15 +25,17 @@ function fixPrefix(prefix):string {
 }
 
 function getColor(text:string, color:any):string {
-    if (process['colorEnabled']) {
-        if (!_.isArray(color)) {
-            color = [color];
-        }
-
-        _(color).each(function (c:string) {
-            text = text[c];
-        });
+    if (!process['colorEnabled']) {
+        return text;
     }
+
+    if (!_.isArray(color)) {
+        color = [color];
+    }
+
+    _.each(color, function (c:string) {
+        text = text[c];
+    });
 
     return text;
 }

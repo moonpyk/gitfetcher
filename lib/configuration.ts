@@ -143,10 +143,10 @@ export class Configuration {
             filename = this.filename;
         }
 
-        var rawConfig = JSON.stringify(this.content, null, o.indent(4));
+        var rawConfig = Configuration.niceJSON(this.content);
 
         try {
-            fs.writeFileSync(filename, Configuration.fixNewLines(rawConfig), {
+            fs.writeFileSync(filename, Configuration.fixLineEndings(rawConfig), {
                 encoding: 'utf8'
             });
 
@@ -166,7 +166,7 @@ export class Configuration {
         var jsStat = JSON.stringify(this.statContent);
 
         try {
-            fs.writeFileSync(filename, Configuration.fixNewLines(jsStat), {
+            fs.writeFileSync(filename, Configuration.fixLineEndings(jsStat), {
                 encoding: 'utf8'
             });
 
@@ -246,18 +246,20 @@ export class Configuration {
             return false;
         }
 
-        var futureConf = {
+        var futureConf:Object = {
             defaults: _.clone(Configuration.defaults)
         };
 
         for (var k in {'context': 0, 'path': 0, 'rpath': 0}) {
-            delete futureConf['defaults'][k];
+            if (futureConf.hasOwnProperty(k)) {
+                delete futureConf['defaults'][k];
+            }
         }
 
-        var confString = JSON.stringify(futureConf, null, o.indent(4));
+        var confString = Configuration.niceJSON(futureConf);
 
         try {
-            fs.writeFileSync(realPath, Configuration.fixNewLines(confString), {
+            fs.writeFileSync(realPath, Configuration.fixLineEndings(confString), {
                 encoding: 'utf8'
             });
         } catch (err) {
@@ -280,7 +282,13 @@ export class Configuration {
         );
     }
 
-    private static fixNewLines(text:string):string {
-        return text.replace(/\n/g, os.EOL) + os.EOL;
+    private static fixLineEndings(text:string):string {
+        return os.EOL === '\n'
+            ? text + os.EOL
+            : text.replace(/\n/g, os.EOL) + os.EOL;
+    }
+
+    private static niceJSON(obj:any) {
+        return JSON.stringify(obj, null, o.indent(4));
     }
 }
