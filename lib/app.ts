@@ -95,7 +95,7 @@ class App {
 
         // Definitely no valid config has been found
         if (conf === null) {
-            if (confLookup.length == 1) {
+            if (confLookup.length === 1) {
                 o.error(nu.format("Unable to read config file '%s'.", confLookup[0]));
             } else {
                 o.error("No config file found, aborting.");
@@ -246,7 +246,8 @@ class App {
 
     addProject() {
         var projectDir = u.resolveExpandEnv(this.program['addProject']),
-            projectName = path.basename(projectDir);
+            projectName = path.basename(projectDir),
+            c = this.configuration;
 
         if (projectName === "defaults") {
             o.error("Project name 'defaults' is not valid");
@@ -255,7 +256,6 @@ class App {
 
         // Looking for a .git directory inside the working copy
         fs.exists(path.join(projectDir, '.git'), (exists) => {
-            var c = this.configuration;
             if (exists) {
                 c.content[projectName] = _.extend(c.content[projectName] || {}, {
                     path: projectDir
