@@ -23,11 +23,11 @@
     "underscore.string": "^2.3.3"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
+    "grunt": ">= 0.4.5",
     "grunt-contrib-jshint": ">= 0.6.0",
     "grunt-contrib-nodeunit": ">= 0.2.0",
     "grunt-contrib-watch": ">= 0.4.4",
-    "grunt-typescript": ">=0.3.8"
+    "grunt-typescript": ">= 0.3.8"
   },
   "bin": {
     "gitfetcher": "./bin/gitfetcher"
