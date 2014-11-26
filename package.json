@@ -1,8 +1,7 @@
 {
   "name": "gitfetcher",
-  "version": "0.3.1",
+  "version": "0.3.2-1",
   "description": "A pretty cool utility to fetch/pull from multiple git repositories configured as projects.",
-  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/moonpyk/gitfetcher.git"
@@ -30,7 +29,7 @@
     "grunt-typescript": ">= 0.3.8"
   },
   "bin": {
-    "gitfetcher": "./bin/gitfetcher"
+    "gitfetcher": "bin/gitfetcher"
   },
   "engines": {
     "node": ">= 0.10.0"

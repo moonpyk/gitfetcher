@@ -1,2 +1,5 @@
 #!/usr/bin/env node
-require('../index');
+
+(function () {
+    new (require('../lib/app.js'))().main(process.argv);
+}());
